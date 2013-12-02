@@ -1,4 +1,4 @@
-jasperClient
+JasperClient
 ============
 
 About
