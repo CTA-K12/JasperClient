@@ -3,10 +3,8 @@
 # Determine Applictation Directory Structure
 define ( "APP_DIR_ROOT", dirname(dirname( __FILE__ )));
 
-# Setup JasperCLient paths - these should be fine as is
-define ( "APP_JASPER_CLIENT", APP_DIR_ROOT . "/Client" );
-define ( "APP_JASPER_CUSTOM", APP_DIR_ROOT . "/Custom" );
-define ( "APP_TEMPLATE_DIR",  APP_DIR_ROOT . "/templates" );
+# Setup JasperCLient paths (Should be fine as is)
+define ("APP_JASPER_CLIENT", APP_DIR_ROOT . "/src");
 
 # Setup Jasper Reporting
 define ( "APP_REPORT_SERVER", "jasper-host:port" );         // Report Server host:port
@@ -24,7 +22,7 @@ spl_autoload_register ( function ($class_name) {
     $class =  str_replace('\\', '/', $class_name);
 
     # Grab standard class
-    if ( file_exists( APP_JASPER_CLIENT . "/" . $class_name . ".php" ) ) {
+    if ( file_exists( .. "/" . $class_name . ".php" ) ) {
         include APP_JASPER_CLIENT ."/". $class_name . ".php";
     }
     # Grab custom class
