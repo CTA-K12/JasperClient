@@ -1,0 +1,35 @@
+<?php
+
+# Determine Applictation Directory Structure
+define ( "APP_DIR_ROOT", dirname(dirname( __FILE__ )));
+
+# Setup JasperCLient paths - these should be fine as is
+define ( "APP_JASPER_CLIENT", APP_DIR_ROOT . "/Client" );
+define ( "APP_JASPER_CUSTOM", APP_DIR_ROOT . "/Custom" );
+define ( "APP_TEMPLATE_DIR",  APP_DIR_ROOT . "/templates" );
+
+# Setup Jasper Reporting
+define ( "APP_REPORT_SERVER", "jasper-host:port" );         // Report Server host:port
+define ( "APP_REPORT_USER", "jasperadmin" );                // Report Server User
+define ( "APP_REPORT_PASS", "" );                           // Report Server Password
+define ( "APP_REPORT_DEFAULT_FOLDER", "/reports" );         // Default Folder for ReportHome
+define ( "APP_REPORT_USE_CACHE", true );                    // Should Folder & Report Metadata be cached
+define ( "APP_REPORT_CACHE_DIR", APP_DIR_ROOT . "/Cache" ); // Cache Location
+define ( "APP_REPORT_CACHE_TIMEOUT", 60 );                  // Lifetime of cache in Minutes
+
+# Auto Load Classes
+spl_autoload_register ( function ($class_name) {
+
+    // Fix classes that specify the namespace
+    $class =  str_replace('\\', '/', $class_name);
+
+    # Grab standard class
+    if ( file_exists( APP_JASPER_CLIENT . "/" . $class_name . ".php" ) ) {
+        include APP_JASPER_CLIENT ."/". $class_name . ".php";
+    }
+    # Grab custom class
+    if ( file_exists( APP_JASPER_CUSTOM . "/" . $class_name . ".php" ) ) {
+        include APP_JASPER_CUSTOM ."/". $class_name . ".php";
+    }
+
+});

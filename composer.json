@@ -1,0 +1,9 @@
+{
+    "name": "mesd/jasper-client",
+    "license": "MIT",
+    "description": "Jasper Client",
+    "autoload": {
+        "psr-0": { "MESD\\JasperClient": "" }
+    },
+    "target-dir": "MESD/JasperClient"
+}
