@@ -3,7 +3,7 @@ JasperClient
 
 About
 -----
-jasperClient is a php library for connecting to the Jaspersoft report server
+JasperClient is a php library for connecting to the Jaspersoft report server
 REST API to run reports.
  
 This library contains some modified code from the flowl/jasper library available at:
