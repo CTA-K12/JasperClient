@@ -1,8 +1,8 @@
-JasperClient
-============
+###JasperClient
+--
 
-About
------
+
+####About
 JasperClient is a php library for connecting to the Jaspersoft report server
 REST API to run reports.
  
@@ -19,13 +19,11 @@ a php application. Creating, updating, and deleting reports or any other objects
 in the Jaspersoft report server is not planned at this time.
 
 
-Status
-------
+####Status
 Beta - Nov 2013
 
 
-Issues to Resolve
------------------
+####Issues to Resolve
 * Upload the report viewer code
 * Find better way to handle report page count
 * Address how report input controls are currently handled
