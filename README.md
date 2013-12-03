@@ -20,12 +20,13 @@ in the Jaspersoft report server is not planned at this time.
 
 
 ####Status
-Beta - Nov 2013
+Beta - Dec 2013
 
 
 ####Issues to Resolve
-* Upload the report viewer code
+* Clean-up report viewer code
 * Find better way to handle report page count
-* Address how report input controls are currently handled
+* Add support for input control items to be read from Jasper Server
 * Cleanup error handling in the report viewer
 * Add support for jasper professional server
+* Add support for more than one folder level in viewer
