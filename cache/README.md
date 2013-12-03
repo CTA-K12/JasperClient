@@ -22,5 +22,5 @@ Next make sure caching is enabled in your config.php
 
     
     define ( "APP_REPORT_USE_CACHE", true );  // Should Folder & Report Metadata be cached
-    define ( "APP_REPORT_CACHE_DIR", APP_DIR_ROOT . "/JasperClient/Cache" );  // Cache Location
+    define ( "APP_REPORT_CACHE_DIR", APP_DIR_ROOT . "/JasperClient/cache" );  // Cache Location
     define ( "APP_REPORT_CACHE_TIMEOUT", 60 );  // Lifetime of cache in Minutes
