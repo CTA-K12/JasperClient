@@ -15,8 +15,8 @@ your report server through your application much more tolerable.
 Make sure that the Cache directory is owned and writeable by your web server user.
 For example on a unix/linux machine, you might do somthing like:
 
-    # sudo chown -R apache:apache JasperClient/Cache
-    # sudo chmod -R 770 JasperClient/Cache
+    # sudo chown -R apache:apache JasperClient/cache
+    # sudo chmod -R 770 JasperClient/cache
     
 Next make sure caching is enabled in your config.php
 
