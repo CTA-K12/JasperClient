@@ -24,6 +24,7 @@ Beta - Dec 2013
 
 
 ####Issues to Resolve
+* Make report asset url dynamic
 * Clean-up report viewer code
 * Find better way to handle report page count
 * Add support for input control items to be read from Jasper Server
