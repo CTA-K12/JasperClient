@@ -1,22 +1,16 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" media="all" href="css/normalize.css" />
-    <link rel="stylesheet" type="text/css" media="all" href="css/main.css" />
-    <link rel="stylesheet" type="text/css" media="all" href="css/jquery-ui-1.8.13.custom.css" />
-    <link rel="stylesheet" type="text/css" media="all" href="css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" media="all"  href="//cdnjs.cloudflare.com/ajax/libs/normalize/2.1.3/normalize.min.css" />
+    <link rel="stylesheet" type="text/css" media="all"  href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" media="all"  href="css/style.css" />
+    <link rel="stylesheet" type="text/css" media="print" href="css/print.css" />
     <!--[if gt IE 8 ]>
     <link rel="stylesheet" type="text/css" media="all" href="css/font-awesome.css" />
     <![endif]-->
     <!--[if !IE ]>
     <link rel="stylesheet" type="text/css" media="all" href="css/font-awesome.css" />
     <![endif]-->
-    <link rel="stylesheet" type="text/css" media="all" href="css/grid_816.css" />
-    <link rel="stylesheet" type="text/css" media="all" href="css/timepicker.css" />
-    <link rel="stylesheet" type="text/css" media="all" href="css/style.css" />
-    <link rel="stylesheet" type="text/css" media="all" href="css/form.css" />
-    <link rel="stylesheet" type="text/css" media="all" href="css/select2.css" />
-    <link rel="stylesheet" type="text/css" media="print" href="css/print.css" />
     <!--[if IE 7 ]>
         <style>
             #content {
@@ -24,21 +18,17 @@
             }
         </style>
     <![endif]-->
-    <title>ORCase</title>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="<?php echo APP_JS_DIR . "/modernizr.min.js"; ?>"></script>
-    <script type="text/javascript" src="<?php echo APP_JS_DIR . "/bootstrap.min.js"; ?>"></script>
-    <script type="text/javascript" src="<?php echo APP_JS_DIR . "/select2.min.js"; ?>"></script>
-    <script type="text/javascript" src="<?php echo APP_JS_DIR . "/moment.min.js"; ?>"></script>
-    <script type="text/javascript" src="<?php echo APP_JS_DIR . "/application.1.js"; ?>"></script>
-    <script type="text/javascript" src="<?php echo APP_JS_DIR . "/timepicker.js"; ?>"></script>
+    <title>JasperClient</title>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.7.0/modernizr.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
   </head>
   <body style="background-color:#e5e5e5;">
         <form id="input-control-form" name="input-control-form" action="" method="POST">
             <div id="reportToolBar" class="navbar navbar-fixed-top">
                 <div class="navbar-inner">
-                    <a class="brand" href="index.php"><img src="images/orcaseLogo.png" /></a>
+                    <a class="brand" href="index.php">JasperClient</a>
                     <ul class="nav">
                         <li class="btn-group">
                             <a href="index.php?q=jasper&a=home" title="Back to reports home" class="btn"><i class="icon-home"></i> Reports Home</a>

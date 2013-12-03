@@ -1,0 +1,175 @@
+body {
+    display:                   block;
+    background-color:           #fff;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    line-height: 16px;
+}
+
+#content {
+    width:                1080px;
+    min-height:            600px;
+    margin:           40px 0 60px 0;
+    background-color:      white;
+}
+
+
+.wrapper-outer {
+    position:             absolute;
+    width:                    100%;
+    top:                      40px;
+    bottom:                    0px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing:    border-box;
+    -ms-box-sizing:     border-box;
+    box-sizing:         border-box;
+}
+
+.wrapper-inner {
+    position:             relative;
+    height:                   100%;
+    width:                    100%;
+}
+
+.sidebar {
+    height:                   100%;
+    width:                   240px;
+    float:                    left;
+    overflow-y:               auto;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing:    border-box;
+    -ms-box-sizing:     border-box;
+    box-sizing:         border-box;
+    background-color:      #ffffff;
+    -webkit-box-shadow: 2px 0 10px 0 rgba(0,0,0,0.1);
+    -moz-box-shadow:    2px 0 10px 0 rgba(0,0,0,0.1);
+    box-shadow:         2px 0 10px 0 rgba(0,0,0,0.1);
+}
+
+.sidebar + .content {
+    margin-left: 240px;
+}
+
+.content {
+    padding: 10px;
+}
+
+
+.input-control {
+    padding: 5px;
+}
+
+.input-control:first-child {
+    margin-top: 5px;
+}
+
+.input-control label {
+    font-size: 12px;
+    margin: 0;
+}
+
+.input-control button,
+.input-control textarea,
+.input-control select,
+.input-control select[multiple],
+.input-control input[type="text"],
+.input-control input[type="password"],
+.input-control input[type="datetime"],
+.input-control input[type="datetime-local"],
+.input-control input[type="date"],
+.input-control input[type="month"],
+.input-control input[type="time"],
+.input-control input[type="week"],
+.input-control input[type="number"],
+.input-control input[type="email"],
+.input-control input[type="url"],
+.input-control input[type="search"],
+.input-control input[type="tel"],
+.input-control input[type="color"],
+.input-control .uneditable-input {
+    height: 30px;
+    width: 100%;
+    margin: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.input-control textarea,
+.input-control select[multiple] {
+    height: 80px;
+}
+
+.input-control select {
+    font-size: 12px;
+}
+
+.navbar .nav li span {
+    padding: 4px 15px;
+    line-height: 40px;
+    color: #000;
+    font-size: 14px;
+}
+
+.navbar .nav > li > a.btn {
+    padding: 4px 14px;
+    color: #000;
+}
+
+.navbar .nav > li > a.btn:focus,
+.navbar .nav > li > a.btn:hover {
+    color:               #333333;
+    background-color:    #e6e6e6;
+    background-position: 0 -15px;
+    -webkit-transition: background-position 0.1s linear;
+       -moz-transition: background-position 0.1s linear;
+         -o-transition: background-position 0.1s linear;
+            transition: background-position 0.1s linear;
+}
+
+.sidebar .nav.nav-pills,
+.sidebar .nav.nav-stacked {
+    margin-top: 10px;
+}
+
+.sidebar .nav.nav-pills li a,
+.sidebar .nav.nav-stacked li a {
+    border-radius: 0;
+}
+
+.content {
+    padding: 20px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    height: 100%;
+}
+
+.content-panel {
+    background-color: #fff;
+    border-radius: 4px;
+    padding: 10px;
+    height: 100%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.jrPage {
+    margin: 60px auto;
+    -webkit-box-shadow: 0px 4px 24px 0px rgba(0,0,0,0.2);
+    -moz-box-shadow: 0px 4px 24px 0px rgba(0,0,0,0.2);
+    -ms-box-shadow: 0px 4px 24px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 4px 24px 0px rgba(0,0,0,0.2);
+    background-color: #FFFFFF;
+}
+
+.jrMessage {
+    background-color: #FFFFFF;
+    position:relative;
+    width:792px;
+    height:612px;
+    padding-top:200px;
+    box-sizing:border-box;
+    text-align:center;
+}

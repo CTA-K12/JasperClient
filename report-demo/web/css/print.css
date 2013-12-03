@@ -1,0 +1,34 @@
+/*Reset Style*/
+@media print {
+
+    @page {size: landscape;}
+    body {
+        margin: 0;
+        padding: 0;
+        line-height: 1.4em;
+        word-spacing: 1px;
+        letter-spacing: 0.2px;
+        font: 12px Arial, Helvetica,"Lucida Grande", serif;
+        color: #000;
+    }
+
+    #reportToolBar {
+        display: none;
+    }
+
+    .wrapper-outer,
+    .wrapper-inner,
+    .content {
+        margin: 0;
+        padding: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+
+    .jrPage {
+        margin: auto;
+    }
+
+}

@@ -164,5 +164,4 @@ switch ( $_GET["a"] ) {
 
         include( APP_TEMPLATE_DIR . "/jasper/home.php");
         break;
-
 }
