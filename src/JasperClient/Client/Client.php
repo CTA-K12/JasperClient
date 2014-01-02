@@ -159,7 +159,7 @@ class Client {
             // an asset loading URL route within the application.
             $output = str_replace(
                                     "/jasperserver/rest_v2/reports/",
-                                    APP_SYSTEM_URL . "?q=jasper&a=asset&jsessionid=".$this->rest->getJSessionID()."&uri=",
+                                    APP_REPORT_ASSET_URL . "&jsessionid=".$this->rest->getJSessionID()."&uri=",
                                     $output
                                  );
         }

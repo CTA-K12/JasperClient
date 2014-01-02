@@ -136,6 +136,7 @@ switch ( $_GET["a"] ) {
         include( APP_TEMPLATE_DIR . "/jasper/report.php");
         break;
 
+
     // Fetch a report asset from jasper server - images, etc.
     case "asset":
 
