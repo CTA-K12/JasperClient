@@ -19,8 +19,13 @@ a php application. Creating, updating, and deleting reports or any other objects
 in the Jaspersoft report server is not planned at this time.
 
 
+####Example
+![JasperClient Demo](doc/img/JasperClientDemo1.png)
+
+
+
 ####Status
-Beta - Dec 2013
+Beta - Jan 2014
 
 
 ####Issues to Resolve
@@ -31,3 +36,4 @@ Beta - Dec 2013
 * Cleanup error handling in the report viewer
 * Add support for jasper professional server
 * Add support for more than one folder level in viewer
+* Fix issue where reports can display in folder view
