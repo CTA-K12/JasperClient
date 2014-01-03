@@ -28,7 +28,7 @@
         <form id="input-control-form" name="input-control-form" action="" method="POST">
             <div id="reportToolBar" class="navbar navbar-fixed-top">
                 <div class="navbar-inner">
-                    <a class="brand" href="index.php">JasperClient</a>
+                    <a class="brand" href="index.php" style="margin: 2px 0 0 0;">JasperClient</a>
                     <ul class="nav">
                         <li class="btn-group">
                             <a href="index.php?q=jasper&a=home" title="Back to reports home" class="btn"><i class="icon-home"></i> Reports Home</a>
