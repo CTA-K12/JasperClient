@@ -1,7 +1,7 @@
 <?php
 
 # Determine Applictation Directory Structure
-define ("APP_DIR_ROOT", dirname(dirname( __FILE__ )));
+define ("APP_DIR_ROOT", dirname(dirname(__FILE__)));
 
 # Setup JasperCLient path (Should be fine as is)
 define ("APP_JASPER_CLIENT", APP_DIR_ROOT . "/src");
@@ -11,12 +11,10 @@ define ("APP_REPORT_SERVER", "jasper-host:port");              // Report Server 
 define ("APP_REPORT_USER", "jasperadmin");                     // Report Server User
 define ("APP_REPORT_PASS", "");                                // Report Server Password
 define ("APP_REPORT_ASSET_URL", "index.php?q=jasper&a=asset"); // URL that will provide report assets
-
-# Setup for Report Home - Demo Report Viewer
-define ("APP_REPORT_DEFAULT_FOLDER", "/reports");         // Default Folder to load
-define ("APP_REPORT_USE_CACHE", true);                    // Should Folder & Report Metadata be cached
-define ("APP_REPORT_CACHE_DIR", APP_DIR_ROOT . "/cache"); // Cache Location
-define ("APP_REPORT_CACHE_TIMEOUT", 60);                  // Lifetime of cache in Minutes
+define ("APP_REPORT_DEFAULT_FOLDER", "/reports");              // Default Folder to load
+define ("APP_REPORT_USE_CACHE", true);                         // Should Folder & Report Metadata be cached
+define ("APP_REPORT_CACHE_DIR", APP_DIR_ROOT . "/cache");      // Cache Location
+define ("APP_REPORT_CACHE_TIMEOUT", 60);                       // Lifetime of cache in Minutes
 
 # Auto Load Classes
 spl_autoload_register (function($class_name) {
