@@ -4,11 +4,12 @@
 #### About 
 Loading of resources and information from the report server REST API can be
 time consuming. Caching of report data is difficult as users have access to
-different selection criteria (security) and the applications data can change
-quickly. All of these make reports highly dynamic. This caching configuration
-won't try to cache report data, but it will cache the report and folder listing
-information.  This cache makes browsing the available forders and reports on
-your report server through your application much more tolerable.
+different selection criteria (think security) and your applications data can
+change quickly. All of these considerations make reports highly dynamic. For
+this reason, this caching configuration won't try to cache report data, but
+it will cache the report and folder metadata. This cache makes browsing the
+available forders and reports on your report server through your application
+much more tolerable.
 
 
 #### Configuration
