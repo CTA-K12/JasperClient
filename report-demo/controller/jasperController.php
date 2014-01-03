@@ -131,7 +131,6 @@ switch ( $_GET["a"] ) {
         $jasperReport->setFormat($format);
 
         $buildResults = $jasperReportBuilder->build();
-        //print '<pre>';print_r($params);exit;
 
         include( APP_TEMPLATE_DIR . "/jasper/report.php");
         break;
