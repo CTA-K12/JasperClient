@@ -61,7 +61,7 @@ class JasperHelper {
      * simple array containing only default selections
      *
      * @param Collection $inputControlList
-     * @return String
+     * @return Array
      */
     public static function convertInputCollection($inputControlList) {
         $inputControlArray = array();
@@ -81,6 +81,31 @@ class JasperHelper {
         }
 
         return $inputControlArray;
+    }
+
+
+    /*
+     * Converts the inputControlState into a simple
+     * array.
+     *
+     * @param Collection $inputControlState
+     * @return Array
+     */
+    public static function convertInputControlState($inputControlState) {
+        $inputControlStateArray = array();
+        $inputControlStateArray["id"] = (string)$inputControlState->id;
+
+        $i = 0;
+        foreach ($inputControlState->options->option as $key => $value) {
+            $inputControlStateArray["option"][$i]["label"]    = (string)$value->label;
+            $inputControlStateArray["option"][$i]["selected"] = (string)$value->selected;
+            $inputControlStateArray["option"][$i]["value"]    = (string)$value->value;
+            $i++;
+        }
+
+        $inputControlStateArray["uri"] = (string)$inputControlState->uri;
+
+        return $inputControlStateArray;
     }
 
 

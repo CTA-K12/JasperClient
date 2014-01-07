@@ -15,6 +15,7 @@ define ("APP_REPORT_DEFAULT_FOLDER", "/reports");              // Default Folder
 define ("APP_REPORT_USE_CACHE", true);                         // Should Folder & Report Metadata be cached
 define ("APP_REPORT_CACHE_DIR", APP_DIR_ROOT . "/cache");      // Cache Location
 define ("APP_REPORT_CACHE_TIMEOUT", 60);                       // Lifetime of cache in Minutes
+define ("APP_REPORT_INPUT_CONTROL", "Jasper");                 // Where to get IC. Jasper, Custom, or Fallback
 
 # Auto Load Classes
 spl_autoload_register (function($class_name) {

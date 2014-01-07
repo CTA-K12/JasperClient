@@ -12,7 +12,7 @@ class InputControlSingleValueDate extends AbstractInputControl {
 
 
     function __construct($id, $label, $mandatory, $readOnly, $type, $uri, $visible, $state) {
-        parent::__construct($id, $label, $mandatory, $readOnly, $type, $uri, $visible);
+        parent::__construct($id, $label, $mandatory, $readOnly, $type, $uri, $visible, $state);
         $this->defaultValue = ($state->value && null != $state->value ? $state->value : null);
     }
 
