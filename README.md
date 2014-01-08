@@ -35,6 +35,9 @@ need.
 ![JasperClient Demo](doc/img/JasperClientDemo1.png)
 
 
+####Installing
+You can find [Documentaion](doc/install.md "Documentaion") in the doc directory
+
 ####Status
 Beta - Jan 2014
 
