@@ -19,7 +19,7 @@
 
 3. If you want to use caching for metadata (on by default), make sure the cache directory is writeable by your web serevr user.
 
-        # sudo chmod -R 770 jasperClient/cache
+        # sudo chmod -R 770 jasperClient/report-demo/cache
         
         
 4. Setup a web server alias for the jasperClient report-demo app. Below is an example alias configuration for the Apache httpd server. Make sure to restart your web service after making the configuration change.
