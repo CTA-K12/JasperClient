@@ -42,3 +42,7 @@
 
         // Report Server Password
         define ("APP_REPORT_PASS", "");
+        
+7. Open the report demo in your browser.
+
+        http://localhost/jasperDemo
