@@ -19,7 +19,7 @@ define ("APP_REPORT_PASS", "passsword");   // Report Server Password
 
 # JasperClient cache configuration
 define ("APP_REPORT_USE_CACHE", true);                       // Should Folder & Report Metadata be cached
-define ("APP_REPORT_CACHE_DIR", APP_DIR_ROOT . "/../cache"); // Cache Location
+define ("APP_REPORT_CACHE_DIR", APP_DIR_ROOT . "/cache"); // Cache Location
 define ("APP_REPORT_CACHE_TIMEOUT", 30);                     // Lifetime of cache in Minutes
 
 # Default folder to load reports from for report home
