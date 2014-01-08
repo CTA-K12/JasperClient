@@ -2,6 +2,7 @@
 <html>
   <head>
     <link rel="stylesheet" type="text/css" media="all"  href="//cdnjs.cloudflare.com/ajax/libs/normalize/2.1.3/normalize.min.css" />
+    <link rel="stylesheet" type="text/css" media="all"  href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/css/base/jquery.ui.all.min.css" />
     <link rel="stylesheet" type="text/css" media="all"  href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" media="all"  href="css/style.css" />
     <link rel="stylesheet" type="text/css" media="print" href="css/print.css" />
@@ -82,4 +83,7 @@
             </div>
         </form>
   </body>
+    <script type="text/javascript">
+    $(".jasperDate").datepicker({ dateFormat: "yy-mm-dd", changeYear: true, changeMonth: true });
+  </script>
 </html>
