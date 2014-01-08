@@ -43,10 +43,10 @@ Beta - Jan 2014
 
 
 ####Issues to Resolve
- - [x] Clean-up report viewer code
- - [ ] Find better way to handle report page count
- - [ ] Cleanup error handling in the report viewer
- - [ ] Add support for ssl
- - [ ] Add support for jasper professional server
- - [ ] Add support for more than one folder level in viewer
- - [ ] Fix issue where reports can display in folder view
+* Clean-up report viewer code
+* Find better way to handle report page count
+* Cleanup error handling in the report viewer
+* Add support for ssl
+* Add support for jasper professional server
+* Add support for more than one folder level in viewer
+* Fix issue where reports can display in folder view
