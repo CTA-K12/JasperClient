@@ -16,16 +16,19 @@ abstract class AbstractInputControl {
     private $type;
     private $uri;
     private $visible;
+    private $getICFrom;
 
-    function __construct($id, $label, $mandatory, $readOnly, $type, $uri, $visible, $state) {
-        $this->id        = $id;
-        $this->label     = $label;
-        $this->mandatory = $mandatory;
-        $this->readOnly  = $readOnly;
-        $this->state     = $state;
-        $this->type      = $type;
-        $this->uri       = $uri;
-        $this->visible   = $visible;
+
+    function __construct($id, $label, $mandatory, $readOnly, $type, $uri, $visible, $state, $getICFrom) {
+        $this->id          = $id;
+        $this->label       = $label;
+        $this->mandatory   = $mandatory;
+        $this->readOnly    = $readOnly;
+        $this->state       = $state;
+        $this->type        = $type;
+        $this->uri         = $uri;
+        $this->visible     = $visible;
+        $this->getICFrom = $getICFrom;
     }
 
     public function getId() {
@@ -65,12 +68,12 @@ abstract class AbstractInputControl {
 
         $optionList = array();
 
-        if ("Custom" == APP_REPORT_INPUT_CONTROL) {
+        if ("Custom" == $this->getICFrom) {
             $customInputClass = "JasperClient\Custom\InputControlOptionList".ucfirst($this->id);
             $optionListClass = new $customInputClass($this->state);
             $optionList = $optionListClass->getList();
         }
-        elseif ("Fallback" == APP_REPORT_INPUT_CONTROL) {
+        elseif ("Fallback" == $this->getICFrom) {
             $customInputClass = "JasperClient\Custom\InputControlOptionList".ucfirst($this->id);
             if (true == class_exists($customInputClass)) {
                 $optionListClass = new $customInputClass($this->state);
@@ -89,7 +92,7 @@ abstract class AbstractInputControl {
                 }
             }
         }
-        elseif ("Jasper" == APP_REPORT_INPUT_CONTROL) {
+        elseif ("Jasper" == $this->getICFrom) {
 
             $inputControlStateArray = JasperHelper::convertInputControlState($this->state);
 
@@ -103,7 +106,7 @@ abstract class AbstractInputControl {
             }
         }
         else {
-            throw new Exception('Invalid APP_REPORT_INPUT_CONTROL type: ' . APP_REPORT_INPUT_CONTROL);
+            throw new \Exception('Invalid APP_REPORT_GET_IC_FROM type: ' . $this->getICFrom);
         }
 
         return $optionList;

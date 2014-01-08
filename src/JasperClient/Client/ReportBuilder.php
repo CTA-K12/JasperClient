@@ -10,20 +10,25 @@ class ReportBuilder {
 
     private $client;
     private $report;
+    private $assetUrl;
+    private $getICFrom;
     private $reportInputControl;
     private $reportOutput;
     private $reportLastPage;
     private $hasMandatoryInput;
 
 
-    function __construct(Client $client, Report $report) {
-        $this->client = $client;
-        $this->report = $report;
+    function __construct(Client $client, Report $report, $assetUrl = null, $getICFrom = "Jasper") {
+        $this->client    = $client;
+        $this->report    = $report;
+        $this->assetUrl  = $assetUrl;
+        $this->getICFrom = $getICFrom;
 
         // Load report input controls
         $this->reportInputControl =
             $this->client->getReportInputControl(
-                $report->getUri()
+                $report->getUri(),
+                $this->getICFrom
             );
 
         // Look for Mandatory Inputs
@@ -63,7 +68,8 @@ class ReportBuilder {
             $this->client->getReport(
                 $this->report->getUri(),
                 $this->report->getFormat(),
-                $this->report->getParamStr()
+                $this->report->getParamStr(),
+                $this->assetUrl
             );
 
         // Look for report errors

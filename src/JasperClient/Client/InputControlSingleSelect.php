@@ -10,8 +10,8 @@ class InputControlSingleSelect extends AbstractInputControl {
 
     private $optionList;
 
-    function __construct($id, $label, $mandatory, $readOnly, $type, $uri, $visible, $state) {
-        parent::__construct($id, $label, $mandatory, $readOnly, $type, $uri, $visible, $state);
+    function __construct($id, $label, $mandatory, $readOnly, $type, $uri, $visible, $state, $getICFrom) {
+        parent::__construct($id, $label, $mandatory, $readOnly, $type, $uri, $visible, $state, $getICFrom);
         $this->optionList = $this->createOptionList();
     }
 

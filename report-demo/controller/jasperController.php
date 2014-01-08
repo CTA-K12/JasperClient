@@ -11,7 +11,11 @@ switch ( $_GET["a"] ) {
     case "home":
 
         // Instantiate a jasper report client
-        $jasperClient = new Client();
+        $jasperClient = new Client(
+            $host = APP_REPORT_SERVER,
+            $user = APP_REPORT_USER,
+            $pass = APP_REPORT_PASS
+        );
 
         // Get list of folders
         $folderCollection = $jasperClient->getFolder(APP_REPORT_DEFAULT_FOLDER);
@@ -19,7 +23,12 @@ switch ( $_GET["a"] ) {
         // If folder is selected, get report list
         if (isset($_GET["folderUri"])) {
             // Get list of sub-folders and reports
-            $folderContentsCollection = $jasperClient->getFolder($_GET["folderUri"]);
+            $folderContentsCollection = $jasperClient->getFolder(
+                $resource     = $_GET["folderUri"],
+                $cache        = APP_REPORT_USE_CACHE,
+                $cacheDir     = APP_REPORT_CACHE_DIR,
+                $cacheTimeout = APP_REPORT_CACHE_TIMEOUT
+            );
         }
 
         include( APP_TEMPLATE_DIR . "/jasper/home.php");
@@ -37,13 +46,22 @@ switch ( $_GET["a"] ) {
         $params = ("html" == $format ? '&page=' . $page : null);
 
         // Instantiate a jasper report client
-        $jasperClient = new Client();
+        $jasperClient = new Client(
+            $host = APP_REPORT_SERVER,
+            $user = APP_REPORT_USER,
+            $pass = APP_REPORT_PASS
+        );
 
         // Instantiate a jasper report
         $jasperReport = new Report($uri, $format, $params);
 
         // Create a new report builder instance
-        $jasperReportBuilder = new ReportBuilder($jasperClient, $jasperReport);
+        $jasperReportBuilder = new ReportBuilder(
+            $jasperClient,
+            $jasperReport,
+            APP_REPORT_ASSET_URL,
+            APP_REPORT_GET_IC_FROM
+        );
 
         // Get report input control list
         $inputControlList = $jasperReportBuilder->getReportInputControl();
@@ -120,13 +138,22 @@ switch ( $_GET["a"] ) {
         $params = json_decode(rawurldecode($_GET["params"]), true);
 
         // Instantiate a jasper report client
-        $jasperClient = new Client();
+        $jasperClient = new Client(
+            $host = APP_REPORT_SERVER,
+            $user = APP_REPORT_USER,
+            $pass = APP_REPORT_PASS
+        );
 
         // Instantiate a jasper report
         $jasperReport = new Report($uri, $format, $params);
 
         // Create a new report builder instance
-        $jasperReportBuilder = new ReportBuilder($jasperClient, $jasperReport);
+        $jasperReportBuilder = new ReportBuilder(
+            $jasperClient,
+            $jasperReport,
+            APP_REPORT_ASSET_URL,
+            APP_REPORT_GET_IC_FROM
+        );
 
         $jasperReport->setFormat($format);
 
@@ -142,7 +169,13 @@ switch ( $_GET["a"] ) {
         // Load images or attchments for a report run,
         // you must have the jsessionid that was used
         // to create a report.
-        $jasperClient = new Client($_GET["jsessionid"]);
+        $jasperClient = new Client(
+            $host = APP_REPORT_SERVER,
+            $user = APP_REPORT_USER,
+            $pass = APP_REPORT_PASS,
+            $_GET["jsessionid"]
+        );
+
         echo $jasperClient->getReportAsset($_GET["uri"]);
         break;
 
@@ -151,15 +184,29 @@ switch ( $_GET["a"] ) {
     default:
 
         // Instantiate a jasper report client
-        $jasperClient = new Client();
+        $jasperClient = new Client(
+            $host = APP_REPORT_SERVER,
+            $user = APP_REPORT_USER,
+            $pass = APP_REPORT_PASS
+        );
 
         // Get list of folders
-        $folderCollection = $jasperClient->getFolder(APP_REPORT_DEFAULT_FOLDER);
+        $folderCollection = $jasperClient->getFolder(
+            $resource     = APP_REPORT_DEFAULT_FOLDER,
+            $cache        = APP_REPORT_USE_CACHE,
+            $cacheDir     = APP_REPORT_CACHE_DIR,
+            $cacheTimeout = APP_REPORT_CACHE_TIMEOUT
+        );
 
         // If folder is selected, get report list
         if (isset($_GET["folderUri"])) {
             // Get list of sub-folders and reports
-            $folderContentsCollection = $jasperClient->getFolder($_GET["folderUri"]);
+            $folderContentsCollection = $jasperClient->getFolder(
+                $resource     = $_GET["folderUri"],
+                $cache        = APP_REPORT_USE_CACHE,
+                $cacheDir     = APP_REPORT_CACHE_DIR,
+                $cacheTimeout = APP_REPORT_CACHE_TIMEOUT
+            );
         }
 
         include( APP_TEMPLATE_DIR . "/jasper/home.php");

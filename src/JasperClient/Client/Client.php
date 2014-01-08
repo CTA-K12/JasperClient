@@ -15,13 +15,11 @@ class Client {
     private $rest;
 
 
-    public function __construct($jSessionID = null, $host = null, $user = null, $pass = null) {
+    public function __construct($host = null, $user = null, $pass = null, $jSessionID = null) {
 
-        // Use the user, pass, & host passed to the constructor unless
-        // null - if null use app config.
-        $this->user = ( $user == null ? APP_REPORT_USER   : $user );
-        $this->pass = ( $pass == null ? APP_REPORT_PASS   : $pass );
-        $this->host = ( $host == null ? APP_REPORT_SERVER : $host );
+        $this->host = $host;
+        $this->user = $user;
+        $this->pass = $pass;
 
         try {
             $this->rest = new RestHandler($this->host, $ssl = false, $jSessionID);
@@ -38,14 +36,18 @@ class Client {
 
 
     public function login($user = null, $pass = null) {
+        // Use the user & pass passed to the method unless
+        // null - if null use those from the constructor.
         $this->user = ( $user == null ? $this->user : $user );
         $this->pass = ( $pass == null ? $this->pass : $pass );
+
         try {
             $resp = $this->rest->post("/jasperserver/rest/login?j_username={$this->user}&j_password={$this->pass}");
         }
         catch (\Exception $e) {
             throw $e;
         }
+
         return true;
     }
 
@@ -57,19 +59,20 @@ class Client {
         catch (\Exception $e) {
             throw $e;
         }
+
         return new \SimpleXMLElement($resp['body']);
     }
 
 
-    public function getFolder($resource) {
+    public function getFolder($resource, $cache = false, $cacheDir = null, $cacheTimeout = 0) {
 
         $pleaseCache = false;
         $pleaseLoad  = false;
 
-        if (true === APP_REPORT_USE_CACHE) {
-            $cacheFile = APP_REPORT_CACHE_DIR . $resource . "/cache.xml";
+        if (true === $cache) {
+            $cacheFile = $cacheDir . $resource . "/cache.xml";
             if(file_exists($cacheFile)) {
-                if (APP_REPORT_CACHE_TIMEOUT < ((time() - filemtime($cacheFile))/60)) {
+                if ($cacheTimeout < ((time() - filemtime($cacheFile))/60)) {
                     $pleaseCache = true;
                     $pleaseLoad  = true;
                 }
@@ -87,13 +90,13 @@ class Client {
             $pleaseLoad  = true;
         }
 
-        if ( true == $pleaseLoad) {
+        if ( true === $pleaseLoad) {
             try {
                 $resp = $this->rest->get(JasperHelper::url("/jasperserver/rest/resources/{$resource}"));
                 $list = new \SimpleXMLElement($resp['body']);
 
-                if (true == $pleaseCache) {
-                    $cacheFolder = APP_REPORT_CACHE_DIR . $resource;
+                if (true === $pleaseCache) {
+                    $cacheFolder = $cacheDir . $resource;
                     $cacheFile   = $cacheFolder . "/cache.xml";
                     if (!file_exists($cacheFolder)) {
                         mkdir($cacheFolder, 0775, true);
@@ -119,7 +122,7 @@ class Client {
     }
 
 
-    public function getReport($resource, $format, $params = null) {
+    public function getReport($resource, $format, $params = null, $assetUrl = null) {
 
         if (is_array($params) && sizeof($params) > 0) {
             $paramStr = '?';
@@ -159,7 +162,7 @@ class Client {
             // an asset loading URL route within the application.
             $output = str_replace(
                                     "/jasperserver/rest_v2/reports/",
-                                    APP_REPORT_ASSET_URL . "&jsessionid=".$this->rest->getJSessionID()."&uri=",
+                                    $assetUrl . "&jsessionid=".$this->rest->getJSessionID()."&uri=",
                                     $output
                                  );
         }
@@ -168,7 +171,7 @@ class Client {
     }
 
 
-    public function getReportInputControl($resource) {
+    public function getReportInputControl($resource, $getICFrom) {
         try {
             $resp = $this->rest->get(JasperHelper::url("/jasperserver/rest_v2/reports/{$resource}/inputControls"));
         }
@@ -192,7 +195,8 @@ class Client {
                         (string)$val->type,
                         (string)$val->uri,
                         (string)$val->visible,
-                        (object)$val->state
+                        (object)$val->state,
+                        (string)$getICFrom
                     );
                 }
                 catch (\Exception $e) {

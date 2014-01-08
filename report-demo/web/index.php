@@ -1,12 +1,7 @@
 <?php
 
 # Load bootstrap to apply configuration
-include( "../../config/config.php" );
-
-# Setup JasperCLient web demo paths
-define ( "APP_CONTROLLER_DIR", dirname(dirname(__FILE__)) . "/controller" );
-define ( "APP_TEMPLATE_DIR",   dirname(dirname(__FILE__)) . "/template" );
-
+include( "../config/config.php" );
 
 session_start();
 
