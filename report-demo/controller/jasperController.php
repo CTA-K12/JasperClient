@@ -77,7 +77,7 @@ switch ( $_GET["a"] ) {
         // Alternatively, use Jasper supplied input control if available
         else {
             // Convert jasper default inputs to string
-            $inputControl = JasperHelper::convertInputCollection($inputControlList);
+            $inputControl = JasperHelper::convertInputCollectionToDefault($inputControlList);
             $jasperReport->setParamStr($params . JasperHelper::inputAsString($inputControl));
         }
 

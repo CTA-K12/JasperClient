@@ -60,4 +60,54 @@ abstract class AbstractInputControl {
         return $this->visible;
     }
 
+
+    public function createOptionList() {
+
+        $optionList = array();
+
+        if ("Custom" == APP_REPORT_INPUT_CONTROL) {
+            $customInputClass = "JasperClient\Custom\InputControlOptionList".ucfirst($this->id);
+            $optionListClass = new $customInputClass($this->state);
+            $optionList = $optionListClass->getList();
+        }
+        elseif ("Fallback" == APP_REPORT_INPUT_CONTROL) {
+            $customInputClass = "JasperClient\Custom\InputControlOptionList".ucfirst($this->id);
+            if (true == class_exists($customInputClass)) {
+                $optionListClass = new $customInputClass($this->state);
+                $optionList = $optionListClass->getList();
+            }
+            else {
+                 $inputControlStateArray = JasperHelper::convertInputControlState($this->state);
+
+                foreach ($inputControlStateArray["option"] as $key => $option) {
+
+                    $optionList[] = new InputControlOption (
+                        $option["value"],
+                        $option["label"],
+                        $option["selected"]
+                    );
+                }
+            }
+        }
+        elseif ("Jasper" == APP_REPORT_INPUT_CONTROL) {
+
+            $inputControlStateArray = JasperHelper::convertInputControlState($this->state);
+
+            foreach ($inputControlStateArray["option"] as $key => $option) {
+
+                $optionList[] = new InputControlOption (
+                    $option["value"],
+                    $option["label"],
+                    $option["selected"]
+                );
+            }
+        }
+        else {
+            throw new Exception('Invalid APP_REPORT_INPUT_CONTROL type: ' . APP_REPORT_INPUT_CONTROL);
+        }
+
+        return $optionList;
+    }
+
+
 }

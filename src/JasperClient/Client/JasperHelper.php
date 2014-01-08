@@ -63,7 +63,7 @@ class JasperHelper {
      * @param Collection $inputControlList
      * @return Array
      */
-    public static function convertInputCollection($inputControlList) {
+    public static function convertInputCollectionToDefault($inputControlList) {
         $inputControlArray = array();
         foreach ($inputControlList as $key => $inputControl) {
             if (method_exists($inputControl, 'getDefaultValue')) {
@@ -80,7 +80,7 @@ class JasperHelper {
             }
         }
 
-        return $inputControlArray;
+        return $inputControlDefaultArray;
     }
 
 
@@ -98,7 +98,7 @@ class JasperHelper {
         $i = 0;
         foreach ($inputControlState->options->option as $key => $value) {
             $inputControlStateArray["option"][$i]["label"]    = (string)$value->label;
-            $inputControlStateArray["option"][$i]["selected"] = (string)$value->selected;
+            $inputControlStateArray["option"][$i]["selected"] = ( 'true' == strtolower((string)$value->selected));
             $inputControlStateArray["option"][$i]["value"]    = (string)$value->value;
             $i++;
         }
