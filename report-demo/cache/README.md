@@ -16,12 +16,12 @@ much more tolerable.
 Make sure that the Cache directory is owned and writeable by your web server user.
 For example on a unix/linux machine, you might do somthing like:
 
-    # sudo chown -R apache:apache JasperClient/cache
-    # sudo chmod -R 770 JasperClient/cache
+    # sudo chown -R apache:apache JasperClient/report-demo/cache
+    # sudo chmod -R 770 JasperClient/report-demo/cache
     
 Next make sure caching is enabled in your config.php
 
     
     define ( "APP_REPORT_USE_CACHE", true );  // Should Folder & Report Metadata be cached
-    define ( "APP_REPORT_CACHE_DIR", APP_DIR_ROOT . "/JasperClient/cache" );  // Cache Location
-    define ( "APP_REPORT_CACHE_TIMEOUT", 60 );  // Lifetime of cache in Minutes
+    define ( "APP_REPORT_CACHE_DIR", APP_DIR_ROOT . "/cache" );  // Cache Location
+    define ( "APP_REPORT_CACHE_TIMEOUT", 30 );  // Lifetime of cache in Minutes
