@@ -14,7 +14,7 @@ This repo includes a php demo report viewer that will display your existing
 reports and takes very little effort to set up.  You can use the demo report
 viewer as an example of how to integrate the JasperClient into your application
 or you can simply embed the viewer in your php application as is.
- 
+
 This library contains some modified code from the flowl/jasper library available at:
 https://github.com/flowl/jasper
 
@@ -28,7 +28,7 @@ need.
 * Minimal configuration
 * Sample report viewer with pagination and export to pdf/xls
 * Supports capability to override input controls
-* Supports caching of folder and report metadata
+* Supports caching of folder and report meta-data
 
 
 ####Example
@@ -36,7 +36,7 @@ need.
 
 
 ####Installing
-You can find [Documentaion](doc/install.md "Documentaion") in the doc directory
+You can find [Documentationn](doc/install.md "Documentation") in the doc directory
 
 ####Status
 Beta - Jan 2014
