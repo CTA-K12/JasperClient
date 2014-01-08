@@ -28,7 +28,7 @@
 
 5. Create config file
 
-        # cd jasperClient/config
+        # cd jasperClient/report-demo/config
         # cp config.php.dist config.php
 
 
