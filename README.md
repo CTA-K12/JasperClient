@@ -36,7 +36,7 @@ need.
 
 
 ####Installing
-You can find [Documentationn](doc/install.md "Documentation") in the doc directory
+You can find [Documentation](doc/install.md "Documentation") in the doc directory
 
 ####Status
 Beta - Jan 2014
