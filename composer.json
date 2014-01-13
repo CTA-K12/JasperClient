@@ -3,7 +3,7 @@
     "license": "MIT",
     "description": "Jasper Client",
     "autoload": {
-        "psr-0": { "JasperClient": "src/" }
+        "psr-0": { "JasperClient": "JasperClient/src/" }
     },
     "target-dir": "JasperClient"
 }
