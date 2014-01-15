@@ -209,7 +209,7 @@ class ResourceDescriptor {
 
         // Creating new child resourceDescriptors
         foreach ($resource->resourceDescriptor as $childResource) {
-            $resourceDescriptor = new JasperResourceDescriptor();
+            $resourceDescriptor = new ResourceDescriptor();
             $resourceDescriptor->fromXml($childResource);
             $this->addChildResource($resourceDescriptor);
         }
@@ -223,7 +223,7 @@ class ResourceDescriptor {
     }
 
 
-    public function addChildResource(JasperResourceDescriptor $resource) {
+    public function addChildResource(ResourceDescriptor $resource) {
         // Some resources have to be references to themselves,
         // when added as a child resource.
         if ($resource->getWsType() == 'jrxml') {
@@ -235,7 +235,7 @@ class ResourceDescriptor {
     }
 
 
-    public function removeChildResource(JasperResourceDescriptor $resource) {
+    public function removeChildResource(ResourceDescriptor $resource) {
         foreach ($this->childResources as $key => $childResource) {
             if ($childResource->getUriString() == $resource->getUriString()) {
                 unset($this->childResources[$key]);
