@@ -24,10 +24,6 @@ class Report {
         return $this->uri;
     }
 
-    public function getPage() {
-        return $this->page;
-    }
-
     public function getFormat() {
         return $this->format;
     }
@@ -39,10 +35,6 @@ class Report {
 
     public function setUri($uri) {
         $this->uri = $uri;
-    }
-
-    public function setPage($page) {
-        $this->page = $page;
     }
 
     public function setFormat($format) {
