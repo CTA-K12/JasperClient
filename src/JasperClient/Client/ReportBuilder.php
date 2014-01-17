@@ -49,6 +49,10 @@ class ReportBuilder {
         return $this->reportLastPage;
     }
 
+    public function getReportCurrentPage() {
+        return $this->report->getPage();
+    }
+
     public function getHasMandatoryInput() {
         return $this->hasMandatoryInput;
     }
