@@ -53,12 +53,13 @@ switch ( $_GET["a"] ) {
         );
 
         // Instantiate a jasper report
-        $jasperReport = new Report($uri, $format, $params);
+        $jasperReport = new Report($uri, $format);
 
         // Create a new report builder instance
         $jasperReportBuilder = new ReportBuilder(
             $jasperClient,
             $jasperReport,
+            $params,
             APP_REPORT_ASSET_URL,
             APP_REPORT_GET_IC_FROM
         );
@@ -90,13 +91,13 @@ switch ( $_GET["a"] ) {
             // Convert user input to string
             $inputControl = $_POST;
             unset($inputControl['submit']);
-            $jasperReport->setParamStr($params . JasperHelper::inputAsString($inputControl));
+            $jasperReportBuilder->setParamStr($params . JasperHelper::inputAsString($inputControl));
         }
         // Alternatively, use Jasper supplied input control if available
         else {
             // Convert jasper default inputs to string
             $inputControl = JasperHelper::convertInputCollectionToDefault($inputControlList);
-            $jasperReport->setParamStr($params . JasperHelper::inputAsString($inputControl));
+            $jasperReportBuilder->setParamStr($params . JasperHelper::inputAsString($inputControl));
         }
 
 
@@ -145,12 +146,13 @@ switch ( $_GET["a"] ) {
         );
 
         // Instantiate a jasper report
-        $jasperReport = new Report($uri, $format, $params);
+        $jasperReport = new Report($uri, $format);
 
         // Create a new report builder instance
         $jasperReportBuilder = new ReportBuilder(
             $jasperClient,
             $jasperReport,
+            $params,
             APP_REPORT_ASSET_URL,
             APP_REPORT_GET_IC_FROM
         );

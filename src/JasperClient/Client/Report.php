@@ -10,47 +10,25 @@ class Report {
 
     private $uri;
     private $format;
-    private $paramStr;
 
-
-    public function __construct ($uri, $format = "html", $paramStr) {
+    public function __construct ($uri, $format = "html") {
         $this->uri      = $uri;
         $this->format   = $format;
-        $this->paramStr = $paramStr;
     }
-
 
     public function getUri() {
         return $this->uri;
-    }
-
-    public function getPage() {
-        return $this->page;
     }
 
     public function getFormat() {
         return $this->format;
     }
 
-    public function getParamStr() {
-        return $this->paramStr;
-    }
-
-
     public function setUri($uri) {
         $this->uri = $uri;
-    }
-
-    public function setPage($page) {
-        $this->page = $page;
     }
 
     public function setFormat($format) {
         $this->format = $format;
     }
-
-    public function setParamStr($paramStr) {
-        $this->paramStr = $paramStr;
-    }
-
 }

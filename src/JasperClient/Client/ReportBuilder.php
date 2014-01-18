@@ -16,11 +16,12 @@ class ReportBuilder {
     private $reportOutput;
     private $reportLastPage;
     private $hasMandatoryInput;
+    private $paramStr;
 
-
-    function __construct(Client $client, Report $report, $assetUrl = null, $getICFrom = "Jasper") {
+    function __construct(Client $client, Report $report, $paramStr = null, $assetUrl = null, $getICFrom = "Jasper") {
         $this->client    = $client;
         $this->report    = $report;
+        $this->paramStr = $paramStr;
         $this->assetUrl  = $assetUrl;
         $this->getICFrom = $getICFrom;
 
@@ -50,11 +51,25 @@ class ReportBuilder {
     }
 
     public function getReportCurrentPage() {
-        return $this->report->getPage();
+        //Get it from the paramStr (saved as page=[some number])
+        if (preg_match('/page=(?<page>[0-9]+)/', $this->paramStr, $matches )) {
+            return intval($matches['page']);
+        } else {
+            //If the page cannot be returned, return 1 as a default for now
+            return 1;
+        }
     }
 
     public function getHasMandatoryInput() {
         return $this->hasMandatoryInput;
+    }
+
+    public function getParamStr() {
+        return $this->paramStr;
+    }
+
+    public function setParamStr($paramStr) {
+        $this->paramStr = $paramStr;
     }
 
     public function setInputControlCssClass($inputControlId, $cssClass) {
@@ -72,7 +87,7 @@ class ReportBuilder {
             $this->client->getReport(
                 $this->report->getUri(),
                 $this->report->getFormat(),
-                $this->report->getParamStr(),
+                $this->paramStr,
                 $this->assetUrl
             );
 
@@ -108,7 +123,7 @@ class ReportBuilder {
                 $this->client->getReport(
                     $this->report->getUri(),
                     'xml',
-                    $this->report->getParamStr()
+                    $this->paramStr
                 );
 
             $objectOutput = new \SimpleXMLElement($xmlOutput['output']);
