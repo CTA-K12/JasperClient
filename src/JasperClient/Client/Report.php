@@ -31,4 +31,3 @@ class Report {
     public function setFormat($format) {
         $this->format = $format;
     }
-}
