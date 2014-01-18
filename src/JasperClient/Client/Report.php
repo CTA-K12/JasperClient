@@ -11,7 +11,7 @@ class Report {
     private $uri;
     private $format;
 
-    public function __construct ($uri, $format = "html") {
+    public function __construct($uri, $format = "html") {
         $this->uri      = $uri;
         $this->format   = $format;
     }
@@ -31,3 +31,4 @@ class Report {
     public function setFormat($format) {
         $this->format = $format;
     }
+}
