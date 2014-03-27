@@ -22,6 +22,7 @@ class RestHandler {
 
     private function getErrorMsg($code) {
         switch ((int)$code) {
+            case   0: return 'Could Not Connect To Host';  //Not actually an http code, but needed when the host does not exist
             case 100: return 'Continue';
             case 101: return 'Switching Protocols';
             case 200: return 'OK';
@@ -108,7 +109,7 @@ class RestHandler {
         }
 
         $error = false;
-        if ($head['http_code'] >= 400) {
+        if ($head['http_code'] >= 400 || $head['http_code'] == 0) {
             if (false == $returnErrors) {
                 throw new JasperException("{$this->getErrorMsg($head['http_code'])} on GET request ({$url})", $head['http_code'], $body);
             }
@@ -141,7 +142,7 @@ class RestHandler {
             throw $e;
         }
 
-        if ($head['http_code'] >= 400) {
+        if ($head['http_code'] >= 400 || $head['http_code'] == 0) {
             throw new JasperException("{$this->getErrorMsg($head['http_code'])} on POST request ({$url})", $head['http_code'], $body);
         }
 
