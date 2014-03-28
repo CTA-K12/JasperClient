@@ -161,7 +161,7 @@ class Client {
             // Replace report image and attchment URLs with
             // an asset loading URL route within the application.
             $output = str_replace(
-                                    "/jasperserver/rest_v2/reports/",
+                                    "/jasperserver/rest_v2/reportExecutions/",
                                     $assetUrl . "&jsessionid=".$this->rest->getJSessionID()."&uri=",
                                     $output
                                  );
@@ -211,7 +211,7 @@ class Client {
 
     public function getReportAsset($resource) {
         try {
-            $resp = $this->rest->get(JasperHelper::url("/jasperserver/rest_v2/reports/".$resource));
+            $resp = $this->rest->get(JasperHelper::url("/jasperserver/rest_v2/reportExecutions/".$resource));
         }
         catch (\Exception $e) {
             throw $e;
