@@ -9,6 +9,14 @@ namespace JasperClient\Client;
 
 class Client {
 
+    ///////////////
+    // CONSTANTS //
+    ///////////////
+
+    const FORMAT_HTML = 'html';
+    const FORMAT_PDF = 'pdf';
+    const FORMAT_XLS = 'xls';
+
     private $host;
     private $user;
     private $pass;
@@ -148,26 +156,42 @@ class Client {
         $error  = $resp['error'];
 
         // Replace static content URLs in output
-        if ($format == 'html') {
+        if (self::FORMAT_HTML == $format) {
+            //Find all the assets in the output
+            preg_match_all('/<.+?src=[\"\'](.+?)[\"\'].*?>/', $output, $matches);
 
-            // Replace jquery library script tag from Jasper
-            // Server - it's loaded as part of the report
-            // viewer already.
-            $output = str_replace(
-                                    "<script type='text/javascript' src='/jasperserver/scripts/jquery/js/jquery-1.7.1.min.js'></script>",
-                                    "",
-                                    $output
-                                 );
-            // Replace report image and attchment URLs with
-            // an asset loading URL route within the application.
-            $output = str_replace(
-                                    "/jasperserver/rest_v2/reportExecutions/",
-                                    $assetUrl . "&jsessionid=".$this->rest->getJSessionID()."&uri=",
-                                    $output
-                                 );
+            //Get the matching assets
+            $assets = isset($matches[1]) ? $matches[1] : array();
+            $replacements = array();
+            foreach($assets as $asset) {
+                //If this is the jquery tag, replace it with an emtpy string
+                if (false !== strpos($asset, 'jquery/js/jquery-')) {
+                    $replacements[] = '';
+                } else {
+                    $replacements[] = $assetUrl . "&jsessionid=" . $this->rest->getJSessionID() . "&uri=" . $asset;
+                }
+            }
+
+            $output = str_replace($assets, $replacements, $output);
         }
 
         return array('output' => $output, 'error' => $error);
+    }
+
+
+    public function startReportExecution($resource, $options = []) {
+        //Create the XML string with the report options
+        $reportExecutionRequest = JasperHelper::generateReportExecutionRequestXML($resource, $options);
+
+        //Send a post request to the report server
+        try {
+            $resp = $this->rest->post(JasperHelper::url("/jasperserver/rest_v2/reportExecutions"), 
+                $reportExecutionRequest, 'application/xml', 'application/xml');
+        } catch (\Exception $e) {
+            throw $e;
+        }
+
+        var_dump($resp['body']); die;
     }
 
 
@@ -211,7 +235,7 @@ class Client {
 
     public function getReportAsset($resource) {
         try {
-            $resp = $this->rest->get(JasperHelper::url("/jasperserver/rest_v2/reportExecutions/".$resource));
+            $resp = $this->rest->get(JasperHelper::url($resource));
         }
         catch (\Exception $e) {
             throw $e;

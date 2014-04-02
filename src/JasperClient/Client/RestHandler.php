@@ -122,11 +122,22 @@ class RestHandler {
     }
 
 
-    public function post($url, Array $arg = null) {
+    public function post($url, $body = null, $contentType = null, $acceptType = null) {
         try {
             $curl = $this->getRequestHandle($url);
-            curl_setopt($curl, CURLOPT_POST, true);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $arg);
+            $headers = array();
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
+            curl_setopt($curl, CURLOPT_HEADER, true);
+            if (null !== $contentType) {
+                $headers[] = 'Content-Type: ' . $contentType;
+            }
+            if (null !== $acceptType) {
+                $headers[] = 'Accept: ' . $acceptType;
+            }
+            if (count($headers) > 0) {
+                curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+            }
 
             $body       = curl_exec($curl);
             $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
