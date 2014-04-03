@@ -179,6 +179,14 @@ class Client {
     }
 
 
+    /**
+     * Requests a report to be run, and returns the report execution detials in xml format
+     * 
+     * @param  string $resource Uri for the report to request to be ran
+     * @param  array  $options  Array of options (detailed in the jasper server rest v2 api)
+     * 
+     * @return SimpleXMLElement The Report Execution Details in XML format
+     */
     public function startReportExecution($resource, $options = []) {
         //Create the XML string with the report options
         $reportExecutionRequest = JasperHelper::generateReportExecutionRequestXML($resource, $options);
@@ -191,7 +199,155 @@ class Client {
             throw $e;
         }
 
-        var_dump($resp['body']); die;
+        //Return the output
+        return new \SimpleXMLElement($resp['body']);
+    }
+
+
+    /**
+     * Polls the status of a report execution
+     * 
+     * @param  string $requestId The request id to poll the status of
+     * 
+     * @return SimpleXMLElement  The xml response from the jasper server
+     */
+    public function pollReportExecution($requestId) {
+        //Make a request to the report executions service
+        try {
+            $resp = $this->rest->get(JasperHelper::url("/jasperserver/rest_v2/reportExecutions/{$requestId}/status"));
+        } catch(\Exception $e) {
+            throw $e;
+        }
+
+        //Return the output
+        return new \SimpleXMLElement($resp['body']);
+    }
+
+    /**
+     * Gets the return from an executed report
+     * 
+     * @param  string $requestID ID from the report execution details whose output to retrieve
+     * 
+     * @return array             Array with key output pointing to the report output and key error pointing to boolean as to whether and error occured
+     */
+    public function getExecutedReport($requestId, $format) {
+        //Make a request to the report executions service
+        try {
+            $resp = $this->rest->get(JasperHelper::url("/jasperserver/rest_v2/reportExecutions/{$requestId}/exports/{$format}/outputResource"));
+        } catch(\Exception $e) {
+            throw $e;
+        }
+
+        //Get the output from the response
+        $output = $resp['body'];
+        $error = $resp['error'];
+
+        //Return the output
+        return array('output' => $output, 'error' => $error);
+    }
+
+
+    /**
+     * Gets the report execution details from the server for a particular request
+     * 
+     * @param  string $requestId Request Id of the report execution request to get the details of
+     * 
+     * @return SimpleXmlElement  XML response from the jasper server
+     */
+    public function getReportExecutionDetails($requestId) {
+        //Make a request to the report executions service
+        try {
+            $resp = $this->rest->get(JasperHelper::url("/jasperserver/rest_v2/reportExecutions/{$requestId}"));
+        } catch(\Exception $e) {
+            throw $e;
+        }
+
+        //Return the output
+        return new \SimpleXMLElement($resp['body']);
+    }
+
+
+    /**
+     * Caches the report in the requested formats
+     * 
+     * @param  string  $requestId            Report execution request id whose output to cache
+     * @param  array   $options              Options array
+     *                                         'formats' => array of formats to cache (e.g. array('pdf', 'html'))
+     *                                         'timeout' => if the report was run asynchronously this the max amount of time (in seconds)
+     *                                                        to wait for the report to finish running
+     *                                         'wait'    => the amount of time to sleep in seconds between report poll requests if async report execution not yet complete
+     *                                         'reportCacheDirectory' => directory where to cache reports
+     * @return boolean                       Boolean indicator of this methods success
+     */
+    public function cacheReportExecution($requestId, $options = []) {
+        //Set the success flag
+        $success = true;
+
+        //Set the options
+        $formats = (isset($options['formats']) && is_array($options['formats'])) ? $options['formats'] : array('pdf', 'html', 'xls');
+        $timeout = (isset($options['timeout']) && null !== $options['timeout'])  ? $options['timeout'] : 60000;
+        $wait    = (isset($options['wait'])    && null !== $options['wait'])     ? $options['wait']    : 5;
+        $reportCacheDirectory = (isset($options['reportCacheDirectory']) && null !== $options['reportCacheDirectory']) 
+            ? $options['reportCacheDirectory'] : 'report_cache/';
+
+        //Check if the report is ready to be exported
+        $timer = 0;
+        while ('ready' !== (string)$this->pollReportExecution($requestId)) {
+            sleep($wait);
+            $timer += $wait;
+            if ($timer > $timeout) {
+                return false;
+            }
+        }
+
+        //Get the report execution details
+        $execDetail = $this->getReportExecutionDetails($requestId);
+
+        //Get the outputs for the reports 
+        $output = array();
+        foreach($formats as $format) {
+            $output[$format] = $this->getExecutedReport($requestId, $format);
+        }
+
+        try {
+            //Write the outputs to the cache
+            //Get the directory
+            $cacheFolder = $reportCacheDirectory . substr($requestId, 0, 2) . '/' . substr($requestId, 2, 2) 
+                . '/' . substr($requestId, 4, 2) . '/' . $requestId;
+
+            //Create the folder if it does not exist
+            if (!file_exists($cacheFolder)) {
+                mkdir($cacheFolder, 0775, true);
+            }
+
+            //Write the report execution file
+            $execDetailFile = $cacheFolder . '/report_execution_details.xml';
+            $edfh = fopen($execDetailFile, 'w');
+            fwrite($edfh, $execDetail->asXML());
+            fclose($edfh);
+
+            //Write each export into a file in the folder
+            foreach($formats as $format) {
+                //Handle html differently
+                if (self::FORMAT_HTML == $format) {
+                    //print($output[$format]['output']); die;
+                } else {
+                    $formatFile = $cacheFolder . '/export.' . $format;
+                    $fh = fopen($formatFile, 'w');
+                    fwrite($fh, $output[$format]['output']);
+                    fclose($fh);
+                }
+            }
+
+        } catch(\Exception $e) {
+            $success = false;
+            throw $e;
+        }
+
+        //If html is a requested format, cache the images
+
+        //Return success
+        return $success;
     }
 
 
