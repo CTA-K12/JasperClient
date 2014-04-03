@@ -1,7 +1,6 @@
 ###JasperClient
 --
 
-
 ####About
 JasperClient is a php library for connecting to a Jaspersoft Report Server,
 via REST API, to run reports.
@@ -13,15 +12,7 @@ in the Jaspersoft Report Server is not planned at this time.
 This repo includes a php demo report viewer that will display your existing
 reports and takes very little effort to set up.  You can use the demo report
 viewer as an example of how to integrate the JasperClient into your application
-or you can simply embed the viewer in your php application as is.
-
-This library contains some modified code from the flowl/jasper library available at:
-https://github.com/flowl/jasper
-
-The flowl/jasper library was in beta and missing functionality that we needed
-(Oct 2013). We originally planned to create a pull request against the library,
-but ended up changing it too heavily and deleted a lot of code that we didn't
-need.
+or you can simply embed the viewer in your php application "as is".
 
 
 ####Features
@@ -39,7 +30,7 @@ need.
 You can find [Documentation](doc/install.md "Documentation") in the doc directory
 
 ####Status
-Beta - Jan 2014
+Beta - April 2014
 
 
 ####Issues to Resolve
@@ -50,3 +41,12 @@ Beta - Jan 2014
 * Add support for jasper professional server
 * Add support for more than one folder level in viewer
 * Fix issue where reports can display in folder view
+
+####History
+This library contains some modified code from the flowl/jasper library available at:
+https://github.com/flowl/jasper
+
+The flowl/jasper library was in beta and missing functionality that we needed
+(Oct 2013). We originally planned to create a pull request against the library,
+but ended up changing it too heavily and deleted a lot of code that we didn't
+need.
