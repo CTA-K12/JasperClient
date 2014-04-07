@@ -7,6 +7,8 @@
 
 namespace JasperClient\Client;
 
+use JasperClient\Client\ReportBuilder;
+
 class Client {
 
     ///////////////
@@ -277,6 +279,7 @@ class Client {
      *                                                        to wait for the report to finish running
      *                                         'wait'    => the amount of time to sleep in seconds between report poll requests if async report execution not yet complete
      *                                         'reportCacheDirectory' => directory where to cache reports
+     *                                         'attachmentsPrefix' => prefix given to attachments in the report execution request (for image caching)
      * @return boolean                       Boolean indicator of this methods success
      */
     public function cacheReportExecution($requestId, $options = []) {
@@ -287,8 +290,13 @@ class Client {
         $formats = (isset($options['formats']) && is_array($options['formats'])) ? $options['formats'] : array('pdf', 'html', 'xls');
         $timeout = (isset($options['timeout']) && null !== $options['timeout'])  ? $options['timeout'] : 60000;
         $wait    = (isset($options['wait'])    && null !== $options['wait'])     ? $options['wait']    : 5;
+        $prefix  = (isset($options['attachmentsPrefix']) && null !== $options['attachmentsPrefix']) ? $options['attachmentsPrefix'] : null;
         $reportCacheDirectory = (isset($options['reportCacheDirectory']) && null !== $options['reportCacheDirectory']) 
             ? $options['reportCacheDirectory'] : 'report_cache/';
+
+        //Set a flag to whether the prefix was set or not, then give it a default of an empty string
+        $prefixSet = $prefix ? true : false;
+        $prefix = $prefix ?: '';
 
         //Check if the report is ready to be exported
         $timer = 0;
@@ -312,8 +320,7 @@ class Client {
         try {
             //Write the outputs to the cache
             //Get the directory
-            $cacheFolder = $reportCacheDirectory . substr($requestId, 0, 2) . '/' . substr($requestId, 2, 2) 
-                . '/' . substr($requestId, 4, 2) . '/' . $requestId;
+            $cacheFolder = JasperHelper::generateReportCacheFolderPath($requestId, $reportCacheDirectory);
 
             //Create the folder if it does not exist
             if (!file_exists($cacheFolder)) {
@@ -330,8 +337,37 @@ class Client {
             foreach($formats as $format) {
                 //Handle html differently
                 if (self::FORMAT_HTML == $format) {
-                    //print($output[$format]['output']); die;
+                    $html = $output[$format]['output'];
+                    //Cache the attachments
+                    $attachments = $this->cacheReportAttachments($execDetail, 
+                        array('reportCacheDirectory' => $reportCacheDirectory,
+                              'attachmentsPrefix' => $prefix));
+
+                    //Update the asset links
+                    $html = JasperHelper::replaceAttachmentLinks($html, 
+                        array('replacements' => $attachments, 'removeJQuery' => true, 'defaultSrc' => !$prefixSet));
+
+                    //Split the html output into pages
+                    libxml_use_internal_errors(true);  //Turn off the warnings for libxml (else an exception will be thrown)
+                    $htmlDoc = new \DOMDocument();
+                    $htmlDoc->loadHTML($html);
+
+                    //Get all the tables from the document (the pages are saved as tables with a class of jrPage)
+                    $tables = $htmlDoc->getElementsByTagName('table');
+                    $pageNumber = 1;
+                    foreach($tables as $table) {
+                        //If the table is a jasper report page (class="jrPage") then save it
+                        if ($table->hasAttribute('class') && 'jrPage' === $table->getAttribute('class')) {
+                            //write each page as a seperate file in the cache
+                            $htmlPageFile = $cacheFolder . '/html_page_' . $pageNumber . '.' . $format;
+                            $fh = fopen($htmlPageFile, 'w');
+                            fwrite($fh, $htmlDoc->saveHTML($table));
+                            fclose($fh);
+                            $pageNumber++;
+                        }
+                    }
                 } else {
+                    //If not html, write the file to the cache folder as export.[format]
                     $formatFile = $cacheFolder . '/export.' . $format;
                     $fh = fopen($formatFile, 'w');
                     fwrite($fh, $output[$format]['output']);
@@ -344,10 +380,119 @@ class Client {
             throw $e;
         }
 
-        //If html is a requested format, cache the images
-
         //Return success
         return $success;
+    }
+
+
+    /**
+     * Takes a report execution detail xml and caches the attachments
+     * 
+     * @param  SimpleXMLElement $reportExecutionDetails The execution detail from a ready report execution
+     * @param  array            $options                Options array:
+     * @param  string                                     'reportCacheDirectory' => Directory of the report cache
+     * @param  string                                     'attachmentsPrefix'    => Prefix requested to be attached to images in the report request
+     * 
+     * @return array                                    An array of the paths of the attachments in the cache keyed by their original name 
+     *                                                    prepended with the attachmentsPrefix
+     */
+    public function cacheReportAttachments(\SimpleXMLElement $reportExecutionDetails, $options = []) {
+        //Handle the options
+        $reportCacheDirectory = 'report_cache/';
+        $attachmentsPrefix = '';
+        extract($options, EXTR_IF_EXISTS);
+
+        //Get the request id
+        $requestId = JasperHelper::getRequestIdFromDetails($reportExecutionDetails);
+
+        //Extract the list of attachments from the report execution request
+        $attachments = array();
+        $attachmentNodes = $reportExecutionDetails->xpath('//reportExecution/exports/export/attachments/attachment');
+        foreach($attachmentNodes as $node) {
+            //Extract the values from the attachment 
+            $contentType = $attachmentFile = null;
+            foreach($node->children() as $child) {
+                if ('contentType' === $child->getName()) {
+                    $contentType = (string)$child;
+                } elseif ('fileName' === $child->getName()) {
+                    $attachmentFile = (string)$child;
+                }
+            }
+
+            //If the values were obtained cache the attachment
+            if (null !== $contentType && null !== $attachmentFile && null !== $requestId) {
+                $attachments[$attachmentsPrefix . $attachmentFile] = $this->cacheReportAttachment($requestId, $attachmentFile, $contentType, 
+                    array('reportCacheDirectory' => $reportCacheDirectory));
+            }
+        }
+
+        //return the attachment array
+        return $attachments;
+    }
+
+
+    /**
+     * Retrieves and caches an attachment for an executed report
+     * 
+     * @param  string $requestId            Request Id of the executed report
+     * @param  string $attachment           The name of the attachment
+     * @param  string $attachmentType       The type of file the attachment is as specified in the report execution detail (e.g. image/png)
+     * @param  array  $options              Options Array:
+     *                                        'reportCacheDirectory' => Directory of the report cache
+     *                                        'exportId' => Id of the export type (html)
+     * 
+     * @return string                       The path to the cached image file
+     */
+    public function cacheReportAttachment($requestId, $attachment, $attachmentType, $options = []) {
+        //Handle the options array
+        $exportId = 'html';
+        $reportCacheDirectory = 'report_cache/';
+        extract($options, EXTR_IF_EXISTS);
+
+        //Get the attachment from the jasper report server
+        try {
+            $resp = $this->rest->get(JasperHelper::url(
+                "/jasperserver/rest_v2/reportExecutions/{$requestId}/exports/{$exportId}/attachments/{$attachment}"
+            ));
+        } catch (\Exception $e) {
+            throw $e;
+        }
+
+        //Get the folder path for this report's image cache
+        $imageCacheFolder = JasperHelper::generateReportCacheFolderPath($requestId, $reportCacheDirectory) . '/images';
+
+        //Create the folder if it does not exist
+        if (!file_exists($imageCacheFolder)) {
+            mkdir($imageCacheFolder, 0775, true);
+        }
+
+        //Determine the filetype
+        $format = 'out';  //Fallback
+        if ('image/png' === $attachmentType) {
+            $format = 'png';
+        }
+
+        //Write the attachment to the cache
+        $imageFile = $imageCacheFolder . '/' . $attachment . '.' . $format;
+        $fh = fopen($imageFile, 'w');
+        fwrite($fh, $resp['body']);
+        fclose($fh);
+
+        //return the new path for the cached image
+        return 'images/' . $attachment .  '.' . $format;
+    }
+
+
+    /**
+     * Returns a report builder attached to this client
+     * 
+     * @param  string $reportUri Uri of the report on the Jasper Server
+     * @param  string $getICFrom Where to get the options for input controls from
+     * 
+     * @return JasperClient\Client\ReportBuilder The new report builder object
+     */
+    public function createReportBuilder($reportUri, $getICFrom = 'Jasper') {
+        return new ReportBuilder($this, $reportUri, $getICFrom);
     }
 
 
