@@ -225,7 +225,7 @@ class ReportBuilder {
      */
     public function build() {
         //If format is html, add page to the params
-        if (self::FORMAT_HTML == $format) {
+        if (self::FORMAT_HTML == $this->format) {
             //Set page to 1 if its not set
             $this->page = $this->page ?: 1;
 
@@ -236,7 +236,7 @@ class ReportBuilder {
         //Get the report body from the client
         $this->reportOutput =
             $this->client->getReport(
-                $this->uri,
+                $this->reportUri,
                 $this->format,
                 $this->params,
                 $this->assetUrl
@@ -247,6 +247,8 @@ class ReportBuilder {
 
         // Look for report errors
         if (true == $this->reportOutput['error']) {
+
+            echo($this->reportOutput['output']); die;
 
             //Get the error information and put it into a format that will print all pretty like
             $errorOuput = new \SimpleXMLElement($this->reportOutput['output']);
@@ -272,19 +274,22 @@ class ReportBuilder {
 
             //Return the error in the report object
             return $report;
+        } else {
+            $report->setOutput($this->reportOutput['output']);
+            $report->setError(false);
         }
 
         // If html format - Find number of pages
         //   This method is terrible, as it runs
         //   the report a second time. I don't
         //   know better way at the moment.
-        if ("html" == $this->report->getFormat()) {
+        if (self::FORMAT_HTML == $this->format) {
 
             $xmlOutput =
                 $this->client->getReport(
-                    $this->report->getUri(),
+                    $this->reportUri,
                     'xml',
-                    $this->paramStr
+                    $this->params
                 );
 
             $objectOutput = new \SimpleXMLElement($xmlOutput['output']);

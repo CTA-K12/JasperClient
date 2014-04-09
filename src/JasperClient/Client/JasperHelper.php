@@ -255,12 +255,20 @@ class JasperHelper {
         //If the parameters is an array turn them into a string
         if (is_array($params) && sizeof($params) > 0) {
             $paramStr = '?';
+            $pieces = array();
             foreach ($params as $param => $val) {
                 //If the param is not in the ignore array
                 if (!in_array($param, $ignore)) {
-                    $paramStr .= $param . '=' . urlencode($val) . '&';
+                    if (is_array($val)) {
+                        foreach ($val as $k => $v ) {
+                            $pieces[] = $param . '=' . urlencode($v);
+                        }
+                    } else {
+                        $pieces[] = $param . '=' . urlencode($val);
+                    }
                 }
             }
+            $paramStr .= implode('&', $pieces);
         } else {
             //else, append the paramter string to the query string character
             $paramStr = '?' . substr($params,1);
@@ -284,15 +292,18 @@ class JasperHelper {
      *                                   'defaultSrc'   => boolean flag, when using a replacements, ignore the keys and assume the 
      *                                                     jasper server default and match by just match by the attachment name
      *                                                     For use when the attachmentCache with no attachmentsPrefix
+     *                                   'jSessionId'   => The JSessionId to set when using the replacement with assetUrl
      * 
      * @return string                  The modified output
      */
     public static function replaceAttachmentLinks($output, $options = []) {
+        ini_set('display_errors', 'On');
         //Handle the options array
         $assetUrl = (isset($options['assetUrl']) && null != $options['assetUrl']) ? $options['assetUrl'] : null;
         $replacements = (isset($options['replacements']) && null != $options['replacements']) ? $options['replacements'] : null;
         $removeJQuery = (isset($options['removeJQuery']) && null != $options['removeJQuery']) ? $options['removeJQuery'] : true;
         $defaultSrc = (isset($options['defaultSrc']) && null != $options['defaultSrc']) ? $options['defaultSrc'] : true;
+        $jSessionId = (isset($options['JSessionID']) && null != $options['JSessionID']) ? $options['JSessionID'] : '';
 
         //create the default arrays
         $assets = array();
@@ -311,7 +322,7 @@ class JasperHelper {
                 if (false !== strpos($asset, 'jquery/js/jquery-') && $removeJQuery) {
                     $replacementAssets[] = '';
                 } else {
-                    $replacementAssets[] = $assetUrl . "&jsessionid=" . $this->rest->getJSessionID() . "&uri=" . $asset;
+                    $replacementAssets[] = $assetUrl . "&jsessionid=" . $jSessionId . "&uri=" . $asset;
                 }
             }
 

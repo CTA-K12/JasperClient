@@ -146,7 +146,7 @@ class Client {
      */
     public function getReport($resource, $format, $params = null, $assetUrl = null) {
         //Process the parameter string
-        $paramStr = JasperHelper::generateParamString($params);
+        $paramStr = JasperHelper::generateParameterString($params);
 
         //Make the request to the Jasper Reports Server
         try {
@@ -165,7 +165,7 @@ class Client {
 
         // Replace static content URLs in output
         if (self::FORMAT_HTML == $format && null !== $assetUrl) {
-            $output = JasperHelper::replaceAttachmentLinks($output, array('assetUrl' => $assetUrl));
+            $output = JasperHelper::replaceAttachmentLinks($output, array('assetUrl' => $assetUrl, 'JSessionID' => $this->rest->getJSessionID()));
         }
 
         return array('output' => $output, 'error' => $error);

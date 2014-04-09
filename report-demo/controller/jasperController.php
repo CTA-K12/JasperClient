@@ -43,7 +43,6 @@ switch ( $_GET["a"] ) {
 
         // Defualt to page 1 for html reports
         $page   = ("html" == $format ? 1 : null);
-        $params = ("html" == $format ? '&page=' . $page : null);
 
         // Instantiate a jasper report client
         $jasperClient = new Client(
@@ -52,21 +51,14 @@ switch ( $_GET["a"] ) {
             $pass = APP_REPORT_PASS
         );
 
-        // Instantiate a jasper report
-        $jasperReport = new Report($uri, $format);
-
         // Create a new report builder instance
-        $jasperReportBuilder = new ReportBuilder(
-            $jasperClient,
-            $jasperReport,
-            $params,
-            APP_REPORT_ASSET_URL,
-            APP_REPORT_GET_IC_FROM
-        );
+        $jasperReportBuilder = $jasperClient->createReportBuilder($uri, APP_REPORT_GET_IC_FROM);
+        $jasperReportBuilder->setAssetUrl(APP_REPORT_ASSET_URL);
+        $jasperReportBuilder->setFormat($format);
+        $jasperReportBuilder->setPage($page);
 
         // Get report input control list
         $inputControlList = $jasperReportBuilder->getReportInputControl();
-
 
         // Grab user supplied input control if available
         if(isset($_POST['submit'])){
@@ -75,29 +67,29 @@ switch ( $_GET["a"] ) {
                     //do nothing
                     break;
                 case 'exportpdf':
-                    $jasperReport->setFormat('pdf');
+                    $jasperReportBuilder->setFormat('pdf');
                     $params = '';
                     break;
                 case 'exportxls':
-                    $jasperReport->setFormat('xls');
+                    $jasperReportBuilder->setFormat('xls');
                     $params = '';
                     break;
                 default:
                     $page = $_POST['submit'];
-                    $params = '&page=' . $page;
+                    $jasperReportBuilder->setPage($page);
                     break;
             }
 
             // Convert user input to string
             $inputControl = $_POST;
             unset($inputControl['submit']);
-            $jasperReportBuilder->setParamStr($params . JasperHelper::inputAsString($inputControl));
+            $jasperReportBuilder->setInputParametersArray($inputControl);
         }
         // Alternatively, use Jasper supplied input control if available
         else {
             // Convert jasper default inputs to string
             $inputControl = JasperHelper::convertInputCollectionToDefault($inputControlList);
-            $jasperReportBuilder->setParamStr($params . JasperHelper::inputAsString($inputControl));
+            $jasperReportBuilder->setInputParametersArray($inputControl);
         }
 
 
@@ -115,7 +107,6 @@ switch ( $_GET["a"] ) {
             $buildResults = $jasperReportBuilder->build();
         }
 
-
         // Create URLs for page navigation and export formats
         // in the report toolbar
         $currentPage = $page;
@@ -126,7 +117,7 @@ switch ( $_GET["a"] ) {
             $pageBackNo       = (1 < $currentPage) ? ($currentPage - 1) : 1;
         }
 
-        $pageLastNo       = $jasperReportBuilder->getReportLastPage();
+        $pageLastNo       = $buildResults->getTotalPages();
         $pageForwardNo    = ($pageLastNo > $currentPage) ? ($currentPage + 1) : $pageLastNo;
         $pageForwardTenNo = ($pageLastNo >= $currentPage +10) ? ($currentPage + 10) : $pageLastNo;
 
