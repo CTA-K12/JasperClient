@@ -98,11 +98,11 @@ class JasperHelper {
     }
 
 
-    /*
+    /**
      * Converts the inputControlState into a simple
      * array.
      *
-     * @param Collection $inputControlState
+     * @param  Collection $inputControlState
      * @return Array
      */
     public static function convertInputControlState($inputControlState) {
@@ -267,40 +267,6 @@ class JasperHelper {
         }
 
         //Return the result 
-        return $paramStr;
-    }
-
-
-    /**
-     * Convert parameter array to something that can be safely used for a file name
-     *
-     * NOTE:  I dont think this method is used anymore
-     *
-     * @param  array  $params array of parameters
-     * @param  array  $ignore array of parameters to ignore (NOTE: ignore currently only works if the params is in an array)
-     * 
-     * @return string         resulting string
-     */
-    public static function generateParameterStringForFilename($params, $ignore = []) {
-        //If the passed in parameters is an array, sort then concat to string
-        if (is_array($params) && sizeof($params) > 0) {
-            $paramStr = '';
-            ksort($params); //Sort the keys, this way the cache for report1?a=1&b=2 is the same for report1?b=2&a=1
-            foreach ($params as $param => $val) {
-                //If the param is not in the ignore array
-                if (!in_array($param, $ignore)) {
-                    $paramStr .= $param . '-' . $val . '_';
-                }
-            }
-        } else {
-            //else, if its a string, just set the to paramStr to it
-            $paramStr = $params;
-        }
-
-        //Sanitize the name
-        $paramStr = preg_replace('/[^a-zA-Z0-9-_\.]/','_', $paramStr);
-
-        //Return the sanitized string
         return $paramStr;
     }
 

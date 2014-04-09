@@ -132,18 +132,23 @@ class Client {
     }
 
 
+    /**
+     * Returns the output of a report that was executed synchronously, and not cached
+     * 
+     * @param  string $resource URI of the report on the Jasper Server
+     * @param  string $format   Format to get the report in
+     * @param  array  $params   Parameters to run the report with
+     * @param  string $assetUrl Url to use to handle the assets in html reports
+     * 
+     * @return array            return array:
+     *                            output -> output of the requested report in string form
+     *                            error  -> boolean inidicating whether an error occured or not
+     */
     public function getReport($resource, $format, $params = null, $assetUrl = null) {
+        //Process the parameter string
+        $paramStr = JasperHelper::generateParamString($params);
 
-        if (is_array($params) && sizeof($params) > 0) {
-            $paramStr = '?';
-            foreach ($params as $param => $val) {
-                $paramStr .= $param . '=' . urlencode($val) . '&';
-            }
-        }
-        else {
-            $paramStr = '?' . substr($params,1);
-        }
-
+        //Make the request to the Jasper Reports Server
         try {
             $resp = $this->rest->get(
                 JasperHelper::url("/jasperserver/rest_v2/reports/{$resource}.{$format}{$paramStr}"),
@@ -154,27 +159,13 @@ class Client {
             throw $e;
         }
 
+        //Make references to the various portions of the response that we want to process and return
         $output = $resp['body'];
         $error  = $resp['error'];
 
         // Replace static content URLs in output
-        if (self::FORMAT_HTML == $format) {
-            //Find all the assets in the output
-            preg_match_all('/<.+?src=[\"\'](.+?)[\"\'].*?>/', $output, $matches);
-
-            //Get the matching assets
-            $assets = isset($matches[1]) ? $matches[1] : array();
-            $replacements = array();
-            foreach($assets as $asset) {
-                //If this is the jquery tag, replace it with an emtpy string
-                if (false !== strpos($asset, 'jquery/js/jquery-')) {
-                    $replacements[] = '';
-                } else {
-                    $replacements[] = $assetUrl . "&jsessionid=" . $this->rest->getJSessionID() . "&uri=" . $asset;
-                }
-            }
-
-            $output = str_replace($assets, $replacements, $output);
+        if (self::FORMAT_HTML == $format && null !== $assetUrl) {
+            $output = JasperHelper::replaceAttachmentLinks($output, array('assetUrl' => $assetUrl));
         }
 
         return array('output' => $output, 'error' => $error);
@@ -534,6 +525,13 @@ class Client {
     }
 
 
+    /**
+     * Gets an asset from the Jasper Server
+     * 
+     * @param  string $resource URI of the asset 
+     * 
+     * @return string           The raw data of the asset in string form
+     */
     public function getReportAsset($resource) {
         try {
             $resp = $this->rest->get(JasperHelper::url($resource));

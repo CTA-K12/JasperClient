@@ -6,10 +6,20 @@
 
 namespace JasperClient\Client;
 
+use JasperClient\Client\Report;
+
 /**
  * Report Builder
  */
 class ReportBuilder {
+
+    ///////////////
+    // CONSTANTS //
+    ///////////////
+
+    const FORMAT_HTML = 'html';
+    const FORMAT_PDF = 'pdf';
+    const FORMAT_XLS = 'xls';
 
     ///////////////
     // VARIABLES //
@@ -29,12 +39,6 @@ class ReportBuilder {
     private $reportUri;
 
     /**
-     * The Url to set as the src for assets in html reports
-     * @var string
-     */
-    private $assetUrl;
-
-    /**
      * Where to get the options for the input controls from
      * @var string
      */
@@ -42,7 +46,7 @@ class ReportBuilder {
 
     /**
      * Reference to the report's collection of input controls
-     * @var JasperClient\Client\AbstractInputControl[]
+     * @var array
      */
     private $reportInputControl;
 
@@ -57,6 +61,30 @@ class ReportBuilder {
      * @var array
      */
     private $params;
+
+    /**
+     * The format of the report (for when getting report output without caching)
+     * @var string
+     */
+    private $format;
+
+    /**
+     * The url to append to assets
+     * @var string
+     */
+    private $assetUrl;
+
+    /**
+     * The page number of the report (for when getting report output without caching and in html format)
+     * @var int
+     */
+    private $page;
+
+    /**
+     * The range of pages to get in a cached or asynchronous report
+     * @var string
+     */
+    private $pageRange;
 
 
     //////////////////
@@ -77,11 +105,35 @@ class ReportBuilder {
         $this->reportUri = $reportUri;
         $this->getICFrom = $getICFrom;
 
+        //Init the params array
+        $params = array();
+
+        //Load the report input controls
+        $this->loadInputControls();
+    }
+
+
+    ///////////////////
+    // CLASS METHODS //
+    ///////////////////
+
+
+    /**
+     * Loads the input controls for the requested report
+     * 
+     * @param  string $getICFrom Optional override to the location of the input control options
+     * 
+     * @return JasperClient\Client\AbstractInputControl The input contols for the requested report
+     */
+    public function loadInputControls($getICFrom = null) {
+        //Set where to get the input controls options from
+        $getICFrom = $getICFrom ?: $this->getICFrom;
+
         // Load report input controls
         $this->reportInputControl =
             $this->client->getReportInputControl(
                 $this->reportUri,
-                $this->getICFrom
+                $getICFrom
             );
 
         // Look for Mandatory Inputs
@@ -91,33 +143,112 @@ class ReportBuilder {
                 $this->hasMandatoryInput = true;
             }
         }
+
+        //Return the loaded input controls
+        return $this->reportInputControl;
     }
 
 
-    ///////////////////
-    // CLASS METHODS //
-    ///////////////////
-
-
-    public function startReportExecution() {
-        return 'please finish this method, stupid';
+    /**
+     * Sets the page range to get for a cached or asynchronous report
+     * 
+     * @param int $min First page to get
+     * @param int $max Last page to get
+     */
+    public function setPageRange($min, $max) {
+        $this->pageRange = $min . '-' . $max;
     }
 
 
+    /**
+     * Sets the input parameters array
+     * 
+     * @param array $params Parameters array keyed by the input parameter's label
+     */
+    public function setInputParametersArray($params = []) {
+        //Foreach value in the given array, set it
+        foreach($params as $label => $values) {
+            $this->setInputParameter($label, $values);
+        }
+    }
 
+
+    /**
+     * Sets an input parameter
+     * 
+     * @param string $label  The label of the input parameter
+     * @param array  $values The array of values the parameter has
+     *                       OR a single value 
+     */
+    public function setInputParameter($label, $values) {
+        //Check if the values input is an array or not
+        if (!is_array($values)) {
+            //If not, make it an array
+            $values = array($values);
+        }
+
+        //Set the params array
+        $this->params[$label] = $values;
+    }
+
+
+    /**
+     * Executes the report with the information given to the report builder
+     *    If not aysnc, this will cache the report
+     * 
+     * @param  boolean $async   Whether to execute the report synchronously or aysnchronously
+     * @param  array   $options Any additional options permitted by the Jasper Server rest v2 API
+     * 
+     * @return string           The request id of the report to load with the report loader (sync) or poll and export (async)
+     */
+    public function executeReport($async = false, $options = []) {
+
+    }
+
+
+    /**
+     * Alias for executeReport(true, $options)
+     * 
+     * @param  array  $options Any additional options permitted by the Jaser Server rest v2 API
+     * 
+     * @return string          Request id from the requested report execution
+     */
+    public function executeAysncReport($options = []) {
+        return $this->executeReport(true, $options);
+    }
+
+
+    /**
+     * Returns the requested report synchronously, without caching it
+     * 
+     * @return JasperClient\Client\Report The ouput
+     */
     public function build() {
+        //If format is html, add page to the params
+        if (self::FORMAT_HTML == $format) {
+            //Set page to 1 if its not set
+            $this->page = $this->page ?: 1;
 
+            //Add it to the params
+            $this->params['page'] = $this->page;
+        }
+
+        //Get the report body from the client
         $this->reportOutput =
             $this->client->getReport(
-                $this->report->getUri(),
-                $this->report->getFormat(),
-                $this->paramStr,
+                $this->uri,
+                $this->format,
+                $this->params,
                 $this->assetUrl
             );
+
+        //Construct a new report object
+        $report = new Report($this->format, $this->page);
 
         // Look for report errors
         if (true == $this->reportOutput['error']) {
 
+            //Get the error information and put it into a format that will print all pretty like
             $errorOuput = new \SimpleXMLElement($this->reportOutput['output']);
 
             if ( $errorOuput->parameters->parameter ) {
@@ -134,7 +265,13 @@ class ReportBuilder {
                 $output .= "\t\t\t</div>\n";
                 $output .= "\t\t</div>\n";
             }
-            return $output;
+            
+            //Set the report to be an error message container
+            $report->setOutput($output);
+            $report->setError(true);
+
+            //Return the error in the report object
+            return $report;
         }
 
         // If html format - Find number of pages
@@ -154,12 +291,12 @@ class ReportBuilder {
 
             foreach ($objectOutput->property as $object) {
                 if('net.sf.jasperreports.export.xml.page.count' == $object->attributes()->name) {
-                    $this->reportLastPage = (string)$object->attributes()->value;
+                    $report->setTotalPages((string)$object->attributes()->value);
                 }
             }
         }
 
-        return $this->reportOutput['output'];
+        return $report;
     }
 
 
@@ -216,29 +353,6 @@ class ReportBuilder {
         return $this;
     }
 
-    /**
-     * Gets the The Url to set as the src for assets in html reports.
-     *
-     * @return string
-     */
-    public function getAssetUrl()
-    {
-        return $this->assetUrl;
-    }
-
-    /**
-     * Sets the The Url to set as the src for assets in html reports.
-     *
-     * @param string $assetUrl the asset url
-     *
-     * @return self
-     */
-    public function setAssetUrl($assetUrl)
-    {
-        $this->assetUrl = $assetUrl;
-
-        return $this;
-    }
 
     /**
      * Gets the Where to get the options for the input controls from.
@@ -253,13 +367,18 @@ class ReportBuilder {
     /**
      * Sets the Where to get the options for the input controls from.
      *
-     * @param string $getICFrom the get i c from
+     * @param string  $getICFrom The location to the input controls from
+     * @param boolean $reload    Whether to reload the input controls
      *
      * @return self
      */
-    public function setGetICFrom($getICFrom)
+    public function setGetICFrom($getICFrom, $reload = false)
     {
         $this->getICFrom = $getICFrom;
+
+        if ($reload) {
+            $this->loadInputControls();
+        }
 
         return $this;
     }
@@ -267,7 +386,7 @@ class ReportBuilder {
     /**
      * Gets the Reference to the report's collection of input controls.
      *
-     * @return JasperClient\Client\AbstractInputControl[]
+     * @return array
      */
     public function getReportInputControl()
     {
@@ -277,7 +396,7 @@ class ReportBuilder {
     /**
      * Sets the Reference to the report's collection of input controls.
      *
-     * @param JasperClient\Client\AbstractInputControl[] $reportInputControl the report input control
+     * @param array $reportInputControl the report input control
      *
      * @return self
      */
@@ -323,16 +442,68 @@ class ReportBuilder {
     }
 
     /**
-     * Sets the Array of parameters keyed by name.
-     *
-     * @param array $params the params
+     * Returns the format
+     * 
+     * @return string Format to get a report in if not caching
+     */
+    public function getFormat() {
+        return $this->format;
+    }
+
+    /**
+     * Set the format to get a report in if not caching
+     * 
+     * @param string $format Format to get a non-cached report in
      *
      * @return self
      */
-    public function setParams($params = [])
-    {
-        $this->params = $params;
+    public function setFormat($format) {
+        $this->format = $format;
 
         return $this;
+    }
+
+    /**
+     * Get the page to return a non-cached html report's ouput on
+     *  
+     * @return int Page number
+     */
+    public function getPage() {
+        return $this->page;
+    }
+
+    /**
+     * Set the page number to return if getting a non-cached report in html format
+     * 
+     * @param int $page Page number
+     *
+     * @return self
+     */
+    public function setPage($page) {
+        $this->page = $page;
+
+        return self;
+    }
+
+    /**
+     * Get the url to append to assets in html reports
+     *  
+     * @return string assetUrl The url to append in string form
+     */
+    public function getAssetUrl() {
+        return $this->assetUrl;
+    }
+
+    /**
+     * Set the url to append to assets in html reports
+     * 
+     * @param string $assetUrl The url to append in string form
+     *
+     * @return self
+     */
+    public function setAssetUrl($assetUrl) {
+        $this->assetUrl = $assetUrl;
+
+        return self;
     }
 }

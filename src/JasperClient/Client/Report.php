@@ -52,6 +52,12 @@ class Report {
      */
     private $requestId;
 
+    /**
+     * If there was an error getting the report output, this flag will be true
+     * @var boolean
+     */
+    private $error;
+
 
     //////////////////
     // BASE METHODS //
@@ -68,6 +74,7 @@ class Report {
         //Set stuff
         $this->format = $format;
         $this->page = $page;
+        $this->error = false;
     }
 
 
@@ -261,6 +268,28 @@ class Report {
     public function setRequestId( $requestId)
     {
         $this->requestId = $requestId;
+
+        return $this;
+    }
+
+    /**
+     * Checks if the report output is error informating instead of the report
+     * 
+     * @return boolean Flag idicating that the report output contains an error message
+     */
+    public function isError() {
+        return $this->error;
+    }
+
+    /**
+     * Sets the error flag
+     * 
+     * @param boolean $error Whether the report output contains error information
+     *
+     * @return self
+     */
+    public function setError($error) {
+        $this->error = $error;
 
         return $this;
     }
