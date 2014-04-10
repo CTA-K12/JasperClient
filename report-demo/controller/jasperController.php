@@ -38,6 +38,8 @@ switch ( $_GET["a"] ) {
     // Run a report
     case "report":
 
+        ini_set('display_errors', 'On');
+
         $uri    = $_GET["uri"];
         $format = $_GET["format"];
 

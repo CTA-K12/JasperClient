@@ -8,6 +8,7 @@
 namespace JasperClient\Client;
 
 use JasperClient\Client\ReportBuilder;
+use JasperClient\Interfaces\InputControlAbstractFactory;
 
 class Client {
 
@@ -479,15 +480,16 @@ class Client {
      * 
      * @param  string $reportUri Uri of the report on the Jasper Server
      * @param  string $getICFrom Where to get the options for input controls from
+     * @param  JasperClient\Interfaces\InputControlAbstractFactory $inputControlFactory Implementation of the input factory to handle inputs
      * 
      * @return JasperClient\Client\ReportBuilder The new report builder object
      */
-    public function createReportBuilder($reportUri, $getICFrom = 'Jasper') {
-        return new ReportBuilder($this, $reportUri, $getICFrom);
+    public function createReportBuilder($reportUri, $getICFrom = 'Jasper', JasperClient\Interfaces\InputControlAbstractFactory $inputControlFactory = null) {
+        return new ReportBuilder($this, $reportUri, $getICFrom, $inputControlFactory);
     }
 
 
-    public function getReportInputControl($resource, $getICFrom) {
+    public function getReportInputControl($resource, $getICFrom = 'Fallback', InputControlAbstractFactory $icFactory = null) {
         try {
             $resp = $this->rest->get(JasperHelper::url("/jasperserver/rest_v2/reports/{$resource}/inputControls"));
         }
@@ -500,23 +502,27 @@ class Client {
         if ( $resp['body'] ) {
             $list = new \SimpleXMLElement($resp['body']);
 
-            foreach($list->inputControl as $key => $val ) {
-                $inputClass = "JasperClient\Client\InputControl".ucfirst($val->type);
-                try {
-                    $collection[] = new $inputClass(
-                        (string)$val->id,
-                        (string)$val->label,
-                        (string)$val->mandatory,
-                        (string)$val->readOnly,
-                        (string)$val->type,
-                        (string)$val->uri,
-                        (string)$val->visible,
-                        (object)$val->state,
-                        (string)$getICFrom
-                    );
-                }
-                catch (\Exception $e) {
-                    throw $e;
+            if (null !== $icFactory) {
+                $collection = $icFacotry->processInputControlSpecification($list);
+            } else {
+                foreach($list->inputControl as $key => $val ) {
+                    $inputClass = "JasperClient\Client\InputControl".ucfirst($val->type);
+                    try {
+                        $collection[] = new $inputClass(
+                            (string)$val->id,
+                            (string)$val->label,
+                            (string)$val->mandatory,
+                            (string)$val->readOnly,
+                            (string)$val->type,
+                            (string)$val->uri,
+                            (string)$val->visible,
+                            (object)$val->state,
+                            (string)$getICFrom
+                        );
+                    }
+                    catch (\Exception $e) {
+                        throw $e;
+                    }
                 }
             }
         }

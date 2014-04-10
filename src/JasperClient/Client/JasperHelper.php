@@ -70,11 +70,12 @@ class JasperHelper {
     }
 
 
-    /*
+    /**
      * Converts the inputControlList collection into
      * simple array containing only default selections
      *
-     * @param Collection $inputControlList
+     * @param  Collection $inputControlList
+     * 
      * @return Array
      */
     public static function convertInputCollectionToDefault($inputControlList) {
@@ -94,7 +95,7 @@ class JasperHelper {
             }
         }
 
-        return $inputControlDefaultArray;
+        return $inputControlArray;
     }
 
 
@@ -103,6 +104,7 @@ class JasperHelper {
      * array.
      *
      * @param  Collection $inputControlState
+     * 
      * @return Array
      */
     public static function convertInputControlState($inputControlState) {
@@ -297,7 +299,6 @@ class JasperHelper {
      * @return string                  The modified output
      */
     public static function replaceAttachmentLinks($output, $options = []) {
-        ini_set('display_errors', 'On');
         //Handle the options array
         $assetUrl = (isset($options['assetUrl']) && null != $options['assetUrl']) ? $options['assetUrl'] : null;
         $replacements = (isset($options['replacements']) && null != $options['replacements']) ? $options['replacements'] : null;

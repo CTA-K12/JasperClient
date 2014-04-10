@@ -86,6 +86,12 @@ class ReportBuilder {
      */
     private $pageRange;
 
+    /**
+     * An implementation of the InputControlAbstractFactory interface
+     * @var JasperClient\Interfaces\InputControlAbstractFactory
+     */
+    private $inputControlFactory;
+
 
     //////////////////
     // BASE METHODS //
@@ -98,12 +104,18 @@ class ReportBuilder {
      * @param Client $client    Report client
      * @param string $reportUri Uri of the report on Jasper Server
      * @param string $getICFrom Where to get the options for the input controls
+     * @param JasperClient\Interfaces\InputControlAbstractFacotry Optional implemention of the input control factory interface when building the input controls
      */
-    function __construct(Client $client, $reportUri, $getICFrom = 'Jasper') {
+    function __construct(
+        Client $client,
+        $reportUri,
+        $getICFrom = 'Jasper',
+        JasperClient\Interfaces\InputControlAbstractFactory $inputControlFactory = null) {
         //Set stuff
         $this->client    = $client;
         $this->reportUri = $reportUri;
         $this->getICFrom = $getICFrom;
+        $this->inputControlFactory = $inputControlFactory;
 
         //Init the params array
         $params = array();
@@ -133,7 +145,8 @@ class ReportBuilder {
         $this->reportInputControl =
             $this->client->getReportInputControl(
                 $this->reportUri,
-                $getICFrom
+                $getICFrom,
+                $this->inputControlFactory
             );
 
         // Look for Mandatory Inputs
@@ -247,8 +260,6 @@ class ReportBuilder {
 
         // Look for report errors
         if (true == $this->reportOutput['error']) {
-
-            echo($this->reportOutput['output']); die;
 
             //Get the error information and put it into a format that will print all pretty like
             $errorOuput = new \SimpleXMLElement($this->reportOutput['output']);
@@ -487,7 +498,7 @@ class ReportBuilder {
     public function setPage($page) {
         $this->page = $page;
 
-        return self;
+        return $this;
     }
 
     /**
@@ -509,6 +520,29 @@ class ReportBuilder {
     public function setAssetUrl($assetUrl) {
         $this->assetUrl = $assetUrl;
 
-        return self;
+        return $this;
+    }
+
+    /**
+     * Get the input control factory
+     * 
+     * @return JasperClient\Interfaces\InputControlAbstractFactory The input control factory
+     */
+    public function getInputControlFactory() {
+        return $this->inputControlFactory;
+    }
+
+    /**
+     * Set the input control factory
+     * 
+     * @param  JasperClient\Interfaces\InputControlAbstractFactory $inputControlFactory Implementation of the input control abstract 
+     *                                                                                  factory to use to build the input controls
+     *
+     * @return self
+     */
+    public function setInputControlFactory(JasperClient\Interfaces\InputControlAbstractFactory $inputControlFactory) {
+        $this->inputControlFactory = $inputControlFactory;
+
+        return $this;
     }
 }
