@@ -8,15 +8,15 @@ namespace JasperClient\Client;
 
 abstract class AbstractInputControl {
 
-    private $id;
-    private $label;
-    private $mandatory;
-    private $readOnly;
-    private $state;
-    private $type;
-    private $uri;
-    private $visible;
-    private $getICFrom;
+    protected $id;
+    protected $label;
+    protected $mandatory;
+    protected $readOnly;
+    protected $state;
+    protected $type;
+    protected $uri;
+    protected $visible;
+    protected $getICFrom;
 
 
     function __construct($id, $label, $mandatory, $readOnly, $type, $uri, $visible, $state, $getICFrom) {

@@ -503,7 +503,7 @@ class Client {
             $list = new \SimpleXMLElement($resp['body']);
 
             if (null !== $icFactory) {
-                $collection = $icFacotry->processInputControlSpecification($list);
+                $collection = $icFactory->processInputControlSpecification($list);
             } else {
                 foreach($list->inputControl as $key => $val ) {
                     $inputClass = "JasperClient\Client\InputControl".ucfirst($val->type);
