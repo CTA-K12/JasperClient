@@ -92,6 +92,21 @@ class ReportBuilder {
      */
     private $inputControlFactory;
 
+    /**
+     * Whether to cache this report or not upon execution
+     *
+     * @var boolean
+     */
+    private $cache;
+
+    /**
+     * Whether to run the report asynchoronously when the run report call is made
+     *
+     * @var boolean
+     */
+    private $async;
+
+
 
     //////////////////
     // BASE METHODS //
@@ -206,35 +221,34 @@ class ReportBuilder {
 
 
     /**
-     * Executes the report with the information given to the report builder
-     *    If not aysnc, this will cache the report
+     * Sends the report execution request to the jasper server and returns the request id
      * 
-     * @param  boolean $async   Whether to execute the report synchronously or aysnchronously
      * @param  array   $options Any additional options permitted by the Jasper Server rest v2 API
      * 
-     * @return string           The request id of the report to load with the report loader (sync) or poll and export (async)
+     * @return string           The request id of the report execution request
      */
-    public function executeReport($async = false, $options = []) {
+    public function sendExecutionRequest($options = []) {
+        //Add the input parameters to the options array
+        $options['parameters'] = $this->params;
 
+        //Send the request to the client
+        $rED = $this->client->startReportExecution($this->reportUri, $options);
+
+        //Return the request id from the report execution details
+        return JasperHelper::getRequestIdFromDetails($rED);
     }
 
 
-    /**
-     * Alias for executeReport(true, $options)
-     * 
-     * @param  array  $options Any additional options permitted by the Jaser Server rest v2 API
-     * 
-     * @return string          Request id from the requested report execution
-     */
-    public function executeAysncReport($options = []) {
-        return $this->executeReport(true, $options);
+
+    public function runReport() {
+
     }
 
 
     /**
      * Returns the requested report synchronously, without caching it
      * 
-     * @return JasperClient\Client\Report The ouput
+     * @return JasperClient\Client\Report The output
      */
     public function build() {
         //If format is html, add page to the params
