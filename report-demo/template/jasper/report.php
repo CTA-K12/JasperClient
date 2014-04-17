@@ -1,22 +1,22 @@
 <?php
 
 // Output the report with the correct format header
-if ("html" == $jasperReport->getFormat()) {
+if ("html" == $buildResults->getFormat()) {
     include( APP_TEMPLATE_DIR . "/jasper/reportToolBar.php");
 
 }
-elseif ("pdf" == $jasperReport->getFormat()) {
+elseif ("pdf" == $buildResults->getFormat()) {
     header ( "Content-type: application/pdf" );
-    print $buildResults;
+    print $buildResults->getOutput;
 }
-elseif ("xls" == $jasperReport->getFormat()) {
+elseif ("xls" == $buildResults->getFormat()) {
     header ( 'Content-type: application/xls' );
     header ( 'Content-Disposition: attachment; filename="report.xls"');
-    print $buildResults;
+    print $buildResults->getOutput;
 }
-elseif ("xml" == $jasperReport->getFormat()) {
+elseif ("xml" == $buildResults->getFormat()) {
     header ( 'Content-type: text/xml' );
-    print $buildResults;
+    print $buildResults->getOutput;
 }
 
 ?>

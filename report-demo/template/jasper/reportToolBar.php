@@ -77,7 +77,7 @@
                     </aside>
 <?php } ?>
                     <section class="content">
-                        <?php print $buildResults; ?>
+                        <?php print $buildResults->getOutput(); ?>
                     </section>
                 </div>
             </div>
