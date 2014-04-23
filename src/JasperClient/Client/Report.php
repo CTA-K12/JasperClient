@@ -29,6 +29,18 @@ class Report {
     private $page;
 
     /**
+     * Array of available formats the report can be exported to
+     * @var array
+     */
+    private $availableFormats;
+
+    /**
+     * Date the report was ran on
+     * @var \DateTime
+     */
+    private $reportCacheDate;
+
+    /**
      * Total Number of pages in the report
      * @var int
      */
@@ -118,8 +130,54 @@ class Report {
             $success = false;
         }
 
+        //Set the cache date
+        $cacheDate = $reportExecutionDetails->xpath('//reportExecution/cacheDate');
+        if (count($cacheDate) > 0) {
+            $this->reportCacheDate = new \DateTime((string)$cacheDate[0]);
+        } else {
+            $success = false;
+        }
+
+        //Set the available formats
+        $availableFormats = $reportExecutionDetails->xpath('//reportExecution/exportFormats');
+        if (count($availableFormats) > 0) {
+            $this->availableFormats = explode(',', (string)$availableFormats[0]);
+        } else {
+            $success = false;
+        }
+
         //Return success
         return $success;
+    }
+
+
+    /**
+     * Replaces the attachments src attributes with an url
+     *
+     * @param  string $assetUrl The asset url to add in with '!asset!' and '!requestId!' to use to replace with the asset information
+     *
+     * @return self
+     */
+    public function addAssetUrl($assetUrl) {
+        //Get all tags with src attributes in the output
+        preg_match_all('/<.+?src=[\"\'](.+?)[\"\'].*?>/', $this->output, $matches);
+
+        //Get the matching assets
+        $assets = isset($matches[1]) ? $matches[1] : array();
+        $replacementAssets = array();
+        foreach($assets as $asset) {
+            //Get the asset name from the asset
+            $assetPieces = explode('/', $asset);
+
+            //Replace each asset with the asset grabbing twig function
+            $replacementAssets[] = str_replace(array('!asset!', '!requestId!'), array(end($assetPieces), $this->requestId), $assetUrl);
+        }
+
+        //Replace the old src attributes with the function
+        $this->setOutput(str_replace($assets, $replacementAssets, $this->getOutput()));
+
+        //Return this
+        return $this;
     }
 
 
@@ -290,6 +348,64 @@ class Report {
      */
     public function setError($error) {
         $this->error = $error;
+
+        return $this;
+    }
+
+    /**
+     * Gets the If there was an error getting the report output, this flag will be true.
+     *
+     * @return boolean
+     */
+    public function getError()
+    {
+        return $this->error;
+    }
+
+    /**
+     * Gets the Array of available formats the report can be exported to.
+     *
+     * @return array
+     */
+    public function getAvailableFormats()
+    {
+        return $this->availableFormats;
+    }
+
+    /**
+     * Sets the Array of available formats the report can be exported to.
+     *
+     * @param array $availableFormats the available formats
+     *
+     * @return self
+     */
+    public function setAvailableFormats($availableFormats = [])
+    {
+        $this->availableFormats = $availableFormats;
+
+        return $this;
+    }
+
+    /**
+     * Gets the Date the report was ran on.
+     *
+     * @return \DateTime
+     */
+    public function getReportCacheDate()
+    {
+        return $this->reportCacheDate;
+    }
+
+    /**
+     * Sets the Date the report was ran on.
+     *
+     * @param \DateTime $reportCacheDate the report cache date
+     *
+     * @return self
+     */
+    public function setReportCacheDate(\DateTime $reportCacheDate)
+    {
+        $this->reportCacheDate = $reportCacheDate;
 
         return $this;
     }

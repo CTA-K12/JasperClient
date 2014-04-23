@@ -180,6 +180,24 @@ class JasperHelper {
 
 
     /**
+     * Extracts the status string from the xml return of a report execution status request
+     *
+     * @param  SimpleXMLElement $reportStatus The XML return from a report execution status request
+     *
+     * @return string                         The status string
+     */
+    public static function getReportStatusFromStatusRequest(\SimpleXMLElement $reportStatus) {
+        //Find the status in return from the status request
+        $status = null;
+        $results = $reportExecutionDetails->xpath('//reportExecution/status');
+        foreach($results as $result) {
+            $status = (string)$result;
+        }
+        return $status;
+    }
+
+
+    /**
      * Generates the report execution request xml in the form of a string
      * 
      * @param  string $resource The uri for the report to run

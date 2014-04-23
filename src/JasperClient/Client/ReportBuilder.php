@@ -7,6 +7,7 @@
 namespace JasperClient\Client;
 
 use JasperClient\Client\Report;
+use JasperClient\Client\ReportLoader;
 
 /**
  * Report Builder
@@ -93,19 +94,11 @@ class ReportBuilder {
     private $inputControlFactory;
 
     /**
-     * Whether to cache this report or not upon execution
+     * Where to cache reports
      *
-     * @var boolean
+     * @var string
      */
-    private $cache;
-
-    /**
-     * Whether to run the report asynchoronously when the run report call is made
-     *
-     * @var boolean
-     */
-    private $async;
-
+    private $reportCache;
 
 
     //////////////////
@@ -239,9 +232,29 @@ class ReportBuilder {
     }
 
 
+    /**
+     * Sends a report execution request (blocking call) and caches the report
+     *
+     * @param  array  $options Options array
+     *
+     * @return Report          Generated Report Object
+     */
+    public function runReport($options = []) {
+        //This does not work with async yet
+        $options['async'] = false;
 
-    public function runReport() {
+        //Get the request id
+        $requestId = $this->sendExecutionRequest($options);
+        
+        //Tell the client to cache
+        $this->client->cacheReportExecution($requestId, array('reportCacheDirectory' => $this->reportCache));
 
+        //Load it
+        $rl = new ReportLoader($this->reportCache);
+        $report = $rl->getCachedReport($requestId, $this->format);
+
+        //Return the report
+        return $report;
     }
 
 
@@ -556,6 +569,31 @@ class ReportBuilder {
      */
     public function setInputControlFactory(JasperClient\Interfaces\InputControlAbstractFactory $inputControlFactory) {
         $this->inputControlFactory = $inputControlFactory;
+
+        return $this;
+    }
+
+
+    /**
+     * Gets the Where to cache reports.
+     *
+     * @return string
+     */
+    public function getReportCache()
+    {
+        return $this->reportCache;
+    }
+
+    /**
+     * Sets the Where to cache reports.
+     *
+     * @param string $reportCache the report cache
+     *
+     * @return self
+     */
+    public function setReportCache($reportCache)
+    {
+        $this->reportCache = $reportCache;
 
         return $this;
     }

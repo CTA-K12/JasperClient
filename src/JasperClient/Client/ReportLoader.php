@@ -30,6 +30,25 @@ class ReportLoader
      */
     private $reportCache;
 
+    /**
+     * Default Value for the page option
+     * @var int
+     */
+    private $defaultPage;
+
+    /**
+     * Default on whether to attach an asset url upon loading
+     * @var boolean
+     */
+    private $defaultAttachAssetUrl;
+
+    /**
+     * The default asset url to attach if attaching asset urls is set to true
+     *   Needs to have placeholds !asset! and !requestId!
+     * @var string
+     */
+    private $defaultAssetUrl;
+
 
     //////////////////
     // BASE METHODS //
@@ -40,9 +59,17 @@ class ReportLoader
      * 
      * @param string $reportCache Path to the report cache
      */
-    public function __construct($reportCache = 'report_cache/') {
-        //Set the variables
+    public function __construct(
+        $reportCache = 'report_cache/',
+        $defaultAttachAssetUrl = false,
+        $defaultAssetUrl = '',
+        $defaultPage = 1
+        ) {
+        //Set stuff
         $this->reportCache = $reportCache;
+        $this->defaultAttachAssetUrl = $defaultAttachAssetUrl;
+        $this->defaultAssetUrl = $defaultAssetUrl;
+        $this->defaultPage = $defaultPage;
     }
 
 
@@ -57,13 +84,18 @@ class ReportLoader
      * @param  string $requestId Request Id of the report to retrieve
      * @param  string $format    Format to retrieve the report in
      * @param  array  $options   Options Array:
-     *                             'page' => The page to load if html
+     *                             'page'     => The page to load if html
+     *                             'attachAssetUrl' => Whether to attach an asset Url to the report output
+     *                             'assetUrl' => An asset url to place on the reports when loading
      * 
      * @return JasperClient\Client\Report The loaded report object from the cache
      */
     public function getCachedReport($requestId, $format, $options = []) {
         //Handle the options
-        $page = (isset($options['page']) && null !== $options['page'] && is_int($options['page'])) ? $options['page'] : 1;
+        $page = (isset($options['page']) && null !== $options['page']) ? $options['page'] : $this->defaultPage;
+        $attachAssetUrl = (isset($options['attachAssetUrl']) && null !== $options['attachAssetUrl']) 
+            ? $options['attachAssetUrl'] : $this->defaultAttachAssetUrl;
+        $assetUrl = (isset($options['assetUrl']) && null !== $options['assetUrl']) ? $options['assetUrl'] : $this->defaultAssetUrl;
 
         //Check if the report exists within the cache
         $cacheDir = JasperHelper::generateReportCacheFolderPath($requestId, $this->reportCache);
@@ -90,7 +122,7 @@ class ReportLoader
         if (self::FORMAT_HTML === $format) {
             $cacheFile = $cacheDir . '/html_page_' . $page . '.html';
         } else {
-            $cacheFile = $cacheDir . '/export' . $format;
+            $cacheFile = $cacheDir . '/export.' . $format;
         }
 
         if (file_exists($cacheFile)) {
@@ -106,6 +138,11 @@ class ReportLoader
             $report->loadReportExecutionDetails($red);
             $report->setOutput($output);
 
+            //If set, call the attach asset url function of the report object
+            if ($attachAssetUrl && self::FORMAT_HTML === $format) {
+                $report->addAssetUrl($assetUrl);
+            }
+
             //Return the report
             return $report;
         } else {
@@ -113,4 +150,129 @@ class ReportLoader
         }
     }
 
+
+    /**
+     * Returns the raw output of a cached asset
+     *
+     * @param  string $asset     The name of the raw asset relative to the cache folder (e.g. images/img_0_0_2.png)
+     * @param  string $requestId The request id of the report the asset is associated with
+     *
+     * @return string            The raw output of the asset
+     */
+    public function getCachedAsset($asset, $requestId) {
+        //Get the directory to this report
+        $cacheDir = JasperHelper::generateReportCacheFolderPath($requestId, $this->reportCache);
+
+        //check that the file exists
+        if (file_exists($cacheDir . '/images/' . $asset)) {
+            return file_get_contents($cacheDir . '/images/' . $asset);
+        } else {
+            //return an empty string until better error handling can be put in place
+            return '';
+        }
+    }
+
+
+    /////////////////////////
+    // GETTERS AND SETTERS //
+    /////////////////////////
+
+
+    /**
+     * Gets the Path to the report cache.
+     *
+     * @return string
+     */
+    public function getReportCache()
+    {
+        return $this->reportCache;
+    }
+
+    /**
+     * Sets the Path to the report cache.
+     *
+     * @param string $reportCache the report cache
+     *
+     * @return self
+     */
+    public function setReportCache($reportCache)
+    {
+        $this->reportCache = $reportCache;
+
+        return $this;
+    }
+
+    /**
+     * Gets the Default Value for the page option.
+     *
+     * @return int
+     */
+    public function getDefaultPage()
+    {
+        return $this->defaultPage;
+    }
+
+    /**
+     * Sets the Default Value for the page option.
+     *
+     * @param int $defaultPage the default page
+     *
+     * @return self
+     */
+    public function setDefaultPage($defaultPage)
+    {
+        $this->defaultPage = $defaultPage;
+
+        return $this;
+    }
+
+    /**
+     * Gets the Default on whether to attach an asset url upon loading.
+     *
+     * @return boolean
+     */
+    public function getDefaultAttachAssetUrl()
+    {
+        return $this->defaultAttachAssetUrl;
+    }
+
+    /**
+     * Sets the Default on whether to attach an asset url upon loading.
+     *
+     * @param boolean $defaultAttachAssetUrl the default attach asset url
+     *
+     * @return self
+     */
+    public function setDefaultAttachAssetUrl($defaultAttachAssetUrl)
+    {
+        $this->defaultAttachAssetUrl = $defaultAttachAssetUrl;
+
+        return $this;
+    }
+
+    /**
+     * Gets the The default asset url to attach if attaching asset urls is set to true
+     *   Needs to have placeholds !asset! and !requestId!.
+     *
+     * @return string
+     */
+    public function getDefaultAssetUrl()
+    {
+        return $this->defaultAssetUrl;
+    }
+
+    /**
+     * Sets the The default asset url to attach if attaching asset urls is set to true
+     *    Needs to have placeholds !asset! and !requestId!.
+     *
+     * @param string $defaultAssetUrl the default asset url
+     *
+     * @return self
+     */
+    public function setDefaultAssetUrl($defaultAssetUrl)
+    {
+        $this->defaultAssetUrl = $defaultAssetUrl;
+
+        return $this;
+    }
 }

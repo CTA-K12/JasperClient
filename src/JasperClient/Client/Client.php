@@ -8,6 +8,7 @@
 namespace JasperClient\Client;
 
 use JasperClient\Client\ReportBuilder;
+use JasperClient\Client\ReportExecutionWatcher;
 use JasperClient\Interfaces\InputControlAbstractFactory;
 
 class Client {
@@ -267,9 +268,6 @@ class Client {
      * @param  string  $requestId            Report execution request id whose output to cache
      * @param  array   $options              Options array
      *                                         'formats' => array of formats to cache (e.g. array('pdf', 'html'))
-     *                                         'timeout' => if the report was run asynchronously this the max amount of time (in seconds)
-     *                                                        to wait for the report to finish running
-     *                                         'wait'    => the amount of time to sleep in seconds between report poll requests if async report execution not yet complete
      *                                         'reportCacheDirectory' => directory where to cache reports
      *                                         'attachmentsPrefix' => prefix given to attachments in the report execution request (for image caching)
      * @return boolean                       Boolean indicator of this methods success
@@ -280,8 +278,6 @@ class Client {
 
         //Set the options
         $formats = (isset($options['formats']) && is_array($options['formats'])) ? $options['formats'] : array('pdf', 'html', 'xls');
-        $timeout = (isset($options['timeout']) && null !== $options['timeout'])  ? $options['timeout'] : 60000;
-        $wait    = (isset($options['wait'])    && null !== $options['wait'])     ? $options['wait']    : 5;
         $prefix  = (isset($options['attachmentsPrefix']) && null !== $options['attachmentsPrefix']) ? $options['attachmentsPrefix'] : null;
         $reportCacheDirectory = (isset($options['reportCacheDirectory']) && null !== $options['reportCacheDirectory']) 
             ? $options['reportCacheDirectory'] : 'report_cache/';
@@ -290,18 +286,13 @@ class Client {
         $prefixSet = $prefix ? true : false;
         $prefix = $prefix ?: '';
 
-        //Check if the report is ready to be exported
-        $timer = 0;
-        while ('ready' !== (string)$this->pollReportExecution($requestId)) {
-            sleep($wait);
-            $timer += $wait;
-            if ($timer > $timeout) {
-                return false;
-            }
-        }
-
         //Get the report execution details
         $execDetail = $this->getReportExecutionDetails($requestId);
+
+        //Attach additional useful information to the report execution details
+        $date = new \DateTime();
+        $execDetail->addChild('exportFormats', implode(',', $formats));
+        $execDetail->addChild('cacheDate', $date->format('Y-m-d H:i:s'));
 
         //Get the outputs for the reports 
         $output = array();
