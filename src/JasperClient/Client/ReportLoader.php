@@ -118,6 +118,15 @@ class ReportLoader
             throw $e;
         }
 
+        //Create a new report object to store the information in
+        $report = new Report($format, $page);
+        $report->loadReportExecutionDetails($red);
+
+        //Check that the report is in the request format
+        if (!in_array($format, $report->getAvailableFormats())) {
+            throw new \Exception(self::MESSAGE_REPORT_NOT_IN_FORMAT);
+        }
+
         //Check that the requested format is available
         if (self::FORMAT_HTML === $format) {
             $cacheFile = $cacheDir . '/html_page_' . $page . '.html';
@@ -133,21 +142,18 @@ class ReportLoader
                 throw $e;
             }
 
-            //Create a new report object to store the information in
-            $report = new Report($format, $page);
-            $report->loadReportExecutionDetails($red);
             $report->setOutput($output);
 
             //If set, call the attach asset url function of the report object
             if ($attachAssetUrl && self::FORMAT_HTML === $format) {
                 $report->addAssetUrl($assetUrl);
             }
-
-            //Return the report
-            return $report;
         } else {
-            throw new \Exception(self::MESSAGE_REPORT_NOT_IN_FORMAT);
+            $report->setOutput('The report is empty');
         }
+
+        //Return the report
+        return $report;
     }
 
 

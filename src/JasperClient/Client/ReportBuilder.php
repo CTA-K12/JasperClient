@@ -237,7 +237,7 @@ class ReportBuilder {
      *
      * @param  array  $options Options array
      *
-     * @return Report          Generated Report Object
+     * @return string          The request id of the cached report
      */
     public function runReport($options = []) {
         //This does not work with async yet
@@ -249,12 +249,8 @@ class ReportBuilder {
         //Tell the client to cache
         $this->client->cacheReportExecution($requestId, array('reportCacheDirectory' => $this->reportCache));
 
-        //Load it
-        $rl = new ReportLoader($this->reportCache);
-        $report = $rl->getCachedReport($requestId, $this->format);
-
-        //Return the report
-        return $report;
+        //Return the request id
+        return $requestId;
     }
 
 

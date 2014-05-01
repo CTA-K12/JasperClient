@@ -146,6 +146,12 @@ class Report {
             $success = false;
         }
 
+        //If total pages is 0, the report is empty mark it as being so
+        if (1 > $this->totalPages) {
+            $this->error = true;
+            $this->output = 'The report is empty';
+        }
+
         //Return success
         return $success;
     }

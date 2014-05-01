@@ -10,6 +10,8 @@ namespace JasperClient\Client;
 use JasperClient\Client\ReportBuilder;
 use JasperClient\Client\ReportExecutionWatcher;
 use JasperClient\Interfaces\InputControlAbstractFactory;
+use JasperClient\Interfaces\PostReportExecutionCallback;
+use JasperClient\Interfaces\PostReportCacheCallback;
 
 class Client {
 
@@ -21,10 +23,45 @@ class Client {
     const FORMAT_PDF = 'pdf';
     const FORMAT_XLS = 'xls';
 
+    ///////////////
+    // VARIABLES //
+    ///////////////
+
+    /**
+     * The host name of the server running jasper server
+     * @var string
+     */
     private $host;
+
+    /**
+     * The username to use when connecting to the jasper server
+     * @var string
+     */
     private $user;
+
+    /**
+     * The password for the user
+     * @var string
+     */
     private $pass;
+
+    /**
+     * Reference to the rest handler
+     * @var RestHandler
+     */
     private $rest;
+
+    /**
+     * Array of objects implementing the postReportExecutionCallback Interface
+     * @var array
+     */
+    private $postExecutionCallbacks;
+
+    /**
+     * Array of objects implementing the postReportCacheCallback Interface
+     * @var array
+     */
+    private $postCacheCallbacks;
 
 
     public function __construct($host = null, $user = null, $pass = null, $jSessionID = null) {
@@ -44,6 +81,10 @@ class Client {
         catch (\Exception $e) {
             throw $e;
         }
+
+        //Initialize the callback arrays
+        $this->postExecutionCallbacks = array();
+        $this->postCacheCallbacks = array();
     }
 
 
@@ -192,6 +233,12 @@ class Client {
                 $reportExecutionRequest, 'application/xml', 'application/xml');
         } catch (\Exception $e) {
             throw $e;
+        }
+
+        if ($this->postExecutionCallbacks) {
+            foreach($this->postExecutionCallbacks as $callback) {
+                $callback->postReportExecution($resource, $options, new \SimpleXMLElement($resp['body']));
+            }
         }
 
         //Return the output
@@ -361,6 +408,12 @@ class Client {
         } catch(\Exception $e) {
             $success = false;
             throw $e;
+        }
+
+        if ($this->postCacheCallbacks) {
+            foreach($this->postCacheCallbacks as $callback) {
+                $callback->postReportCache($requestId, $options, $execDetail);
+            }
         }
 
         //Return success
@@ -538,6 +591,21 @@ class Client {
         }
 
         return $resp['body'];
+    }
+
+
+    /**
+     * Add a callback class to the list of post report execution callbacks
+     *
+     * @param PostReportExecutionCallback $callback The callback to add to the list
+     */
+    public function addPostReportExecutionCallback(PostReportExecutionCallback $callback) {
+        $this->postExecutionCallbacks[] = $callback;
+    }
+
+
+    public function addPostReportCacheCallback(PostReportCacheCallback $callback) {
+        $this->postCacheCallbacks[] = $callback;
     }
 
 }

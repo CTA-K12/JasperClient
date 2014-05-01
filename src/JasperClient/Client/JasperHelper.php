@@ -246,13 +246,15 @@ class JasperHelper {
         if ($attachmentsPrefix) { $writer->writeElement('attachmentsPrefix', $attachmentsPrefix); }
         $writer->startElement('parameters');
         $writer->text('');  //By having this when no parameters are present the tags show properly
-        foreach($parameters as $name => $values) {
-            $writer->startElement('reportParameter');
-            $writer->writeAttribute('name', $name);
-            foreach($values as $value) {
-                $writer->writeElement('value', $value);
+        if (null !== $parameters) {
+            foreach($parameters as $name => $values) {
+                $writer->startElement('reportParameter');
+                $writer->writeAttribute('name', $name);
+                foreach($values as $value) {
+                    $writer->writeElement('value', $value);
+                }
+                $writer->endElement();
             }
-            $writer->endElement();
         }
         $writer->endElement();
 
@@ -351,9 +353,9 @@ class JasperHelper {
                 preg_match_all('/<.+?src=[\"\'](.+?)[\"\'].*?>/', $output, $matches);
 
                 //Get the matching assets
-                $assets = isset($matches[1]) ? $matches[1] : array();
+                $srcAssets = isset($matches[1]) ? $matches[1] : array();
                 $replacementAssets = array();
-                foreach($assets as $asset) {
+                foreach($srcAssets as $asset) {
                     //Ignore jquery for now
                     if (false === strpos($asset, 'jquery/js/jquery-') && $removeJQuery) {
                         //Break the url into parts
