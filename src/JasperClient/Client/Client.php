@@ -411,6 +411,8 @@ class Client {
         }
 
         if ($this->postCacheCallbacks) {
+            //Temporary fix until the options array is handled via array merge
+            $options['formats'] = $formats;
             foreach($this->postCacheCallbacks as $callback) {
                 $callback->postReportCache($requestId, $options, $execDetail);
             }
