@@ -526,11 +526,11 @@ class Client {
      * 
      * @param  string $reportUri Uri of the report on the Jasper Server
      * @param  string $getICFrom Where to get the options for input controls from
-     * @param  JasperClient\Interfaces\InputControlAbstractFactory $inputControlFactory Implementation of the input factory to handle inputs
+     * @param  InputControlAbstractFactory $inputControlFactory Implementation of the input factory to handle inputs
      * 
-     * @return JasperClient\Client\ReportBuilder The new report builder object
+     * @return ReportBuilder The new report builder object
      */
-    public function createReportBuilder($reportUri, $getICFrom = 'Jasper', JasperClient\Interfaces\InputControlAbstractFactory $inputControlFactory = null) {
+    public function createReportBuilder($reportUri, $getICFrom = 'Jasper', InputControlAbstractFactory $inputControlFactory = null) {
         return new ReportBuilder($this, $reportUri, $getICFrom, $inputControlFactory);
     }
 

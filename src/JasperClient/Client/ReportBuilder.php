@@ -8,6 +8,7 @@ namespace JasperClient\Client;
 
 use JasperClient\Client\Report;
 use JasperClient\Client\ReportLoader;
+use JasperClient\Interfaces\InputControlAbstractFactory;
 
 /**
  * Report Builder
