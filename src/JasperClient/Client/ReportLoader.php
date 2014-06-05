@@ -79,6 +79,26 @@ class ReportLoader
 
 
     /**
+     * Checks if a report is saved in the report store
+     *
+     * @param  string  $requestId The request id of the report to check
+     *
+     * @return boolean            Whether the report is in the store or not
+     */
+    public function checkIfReportIsStored($requestId) {
+        //Check if the report exists within the cache
+        $cacheDir = JasperHelper::generateReportCacheFolderPath($requestId, $this->reportCache);
+
+        //Check that the report was cached
+        if (file_exists($cacheDir)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
      * Gets the output of a report from the cache
      * 
      * @param  string $requestId Request Id of the report to retrieve
