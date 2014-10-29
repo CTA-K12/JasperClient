@@ -385,7 +385,7 @@ class Report {
      *
      * @return self
      */
-    public function setAvailableFormats($availableFormats = [])
+    public function setAvailableFormats($availableFormats = array())
     {
         $this->availableFormats = $availableFormats;
 

@@ -205,7 +205,7 @@ class JasperHelper {
      * 
      * @return string           Request as an xml string
      */
-    public static function generateReportExecutionRequestXML($resource, $options = []) {
+    public static function generateReportExecutionRequestXML($resource, $options = array()) {
         //Set the defaults and get the information from the options array
         //Options with defaults
         $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
@@ -273,7 +273,7 @@ class JasperHelper {
      * 
      * @return string         resulting string
      */
-    public static function generateParameterString($params, $ignore = []) {
+    public static function generateParameterString($params, $ignore = array()) {
         //If the parameters is an array turn them into a string
         if (is_array($params) && sizeof($params) > 0) {
             $paramStr = '?';
@@ -318,7 +318,7 @@ class JasperHelper {
      * 
      * @return string                  The modified output
      */
-    public static function replaceAttachmentLinks($output, $options = []) {
+    public static function replaceAttachmentLinks($output, $options = array()) {
         //Handle the options array
         $assetUrl = (isset($options['assetUrl']) && null != $options['assetUrl']) ? $options['assetUrl'] : null;
         $replacements = (isset($options['replacements']) && null != $options['replacements']) ? $options['replacements'] : null;

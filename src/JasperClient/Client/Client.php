@@ -223,7 +223,7 @@ class Client {
      * 
      * @return SimpleXMLElement The Report Execution Details in XML format
      */
-    public function startReportExecution($resource, $options = []) {
+    public function startReportExecution($resource, $options = array()) {
         //Create the XML string with the report options
         $reportExecutionRequest = JasperHelper::generateReportExecutionRequestXML($resource, $options);
 
@@ -319,7 +319,7 @@ class Client {
      *                                         'attachmentsPrefix' => prefix given to attachments in the report execution request (for image caching)
      * @return boolean                       Boolean indicator of this methods success
      */
-    public function cacheReportExecution($requestId, $options = []) {
+    public function cacheReportExecution($requestId, $options = array()) {
         //Set the success flag
         $success = true;
 
@@ -434,7 +434,7 @@ class Client {
      * @return array                                    An array of the paths of the attachments in the cache keyed by their original name 
      *                                                    prepended with the attachmentsPrefix
      */
-    public function cacheReportAttachments(\SimpleXMLElement $reportExecutionDetails, $options = []) {
+    public function cacheReportAttachments(\SimpleXMLElement $reportExecutionDetails, $options = array()) {
         //Handle the options
         $reportCacheDirectory = 'report_cache/';
         $attachmentsPrefix = '';
@@ -481,7 +481,7 @@ class Client {
      * 
      * @return string                       The path to the cached image file
      */
-    public function cacheReportAttachment($requestId, $attachment, $attachmentType, $options = []) {
+    public function cacheReportAttachment($requestId, $attachment, $attachmentType, $options = array()) {
         //Handle the options array
         $exportId = 'html';
         $reportCacheDirectory = 'report_cache/';

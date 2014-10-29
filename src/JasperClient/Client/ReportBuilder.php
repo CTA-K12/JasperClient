@@ -187,7 +187,7 @@ class ReportBuilder {
      * 
      * @param array $params Parameters array keyed by the input parameter's label
      */
-    public function setInputParametersArray($params = []) {
+    public function setInputParametersArray($params = array()) {
         //Foreach value in the given array, set it
         foreach($params as $label => $values) {
             $this->setInputParameter($label, $values);
@@ -221,7 +221,7 @@ class ReportBuilder {
      * 
      * @return string           The request id of the report execution request
      */
-    public function sendExecutionRequest($options = []) {
+    public function sendExecutionRequest($options = array()) {
         //Add the input parameters to the options array
         $options['parameters'] = $this->params;
 
@@ -240,7 +240,7 @@ class ReportBuilder {
      *
      * @return string          The request id of the cached report
      */
-    public function runReport($options = []) {
+    public function runReport($options = array()) {
         //This does not work with async yet
         $options['async'] = false;
 

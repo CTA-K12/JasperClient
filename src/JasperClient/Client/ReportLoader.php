@@ -110,7 +110,7 @@ class ReportLoader
      * 
      * @return JasperClient\Client\Report The loaded report object from the cache
      */
-    public function getCachedReport($requestId, $format, $options = []) {
+    public function getCachedReport($requestId, $format, $options = array()) {
         //Handle the options
         $page = (isset($options['page']) && null !== $options['page']) ? $options['page'] : $this->defaultPage;
         $attachAssetUrl = (isset($options['attachAssetUrl']) && null !== $options['attachAssetUrl']) 
