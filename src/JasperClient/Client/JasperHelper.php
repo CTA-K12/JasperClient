@@ -180,6 +180,59 @@ class JasperHelper {
 
 
     /**
+     * Get the export id from the export execution details
+     *
+     * @param  SimpleXMLElement $exportExecutionDetails The export execution details xml
+     *
+     * @return string                                   The export id
+     */
+    public static function getExportIdFromDetails(\SimpleXMLElement $exportExecutionDetails) {
+        //Find the id in the details xml
+        $exportId = null;
+        $results = $exportExecutionDetails->xpath('//exportExecution/id');
+        foreach($results as $result) {
+            $exportId = (string)$result;
+        }
+        return $exportId;
+    }
+
+
+    /**
+     * Get the export status from the export execution details
+     *
+     * @param  SimpleXMLElement $exportExecutionDetails The export execution details
+     *
+     * @return string                                   The status in string form
+     */
+    public static function getExportStatusFromDetails(\SimpleXMLElement $exportExecutionDetails) {
+        $status = null;
+        $results = $exportExecutionDetails->xpath('//exportExecution/status');
+        foreach($results as $result) {
+            $status = (string)$result;
+        }
+        return $status;
+    }
+
+
+
+    /**
+     * Get the export status from the export poll
+     *
+     * @param  SimpleXMLElement $exportExecutionPoll The export poll
+     *
+     * @return string                                   The status in string form
+     */
+    public static function getExportStatusFromPoll(\SimpleXMLElement $exportExecutionPoll) {
+        $status = null;
+        $results = $exportExecutionPoll->xpath('//status');
+        foreach($results as $result) {
+            $status = (string)$result;
+        }
+        return $status;
+    }
+
+
+    /**
      * Extracts the status string from the xml return of a report execution status request
      *
      * @param  SimpleXMLElement $reportStatus The XML return from a report execution status request
@@ -208,17 +261,17 @@ class JasperHelper {
     public static function generateReportExecutionRequestXML($resource, $options = []) {
         //Set the defaults and get the information from the options array
         //Options with defaults
-        $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
-        $freshData = self::DEFAULT_FRESH_DATA;
-        $saveDataSnapshot = self::DEFAULT_SAVE_DATA_SNAPSHOT;
-        $interactive = self::DEFAULT_INTERACTIVE;
-        $ignorePagination = self::DEFAULT_IGNORE_PAGINATION;
-        $async = self::DEFAULT_ASYNC;
+        $outputFormat = isset($options['outputFormat']) ? $options['outputFormat'] : self::DEFAULT_OUTPUT_FORMAT;
+        $freshData = isset($options['freshData']) ? $options['freshData'] : self::DEFAULT_FRESH_DATA;
+        $saveDataSnapshot = isset($options['saveDataSnapshot']) ? $options['saveDataSnapshot'] : self::DEFAULT_SAVE_DATA_SNAPSHOT;
+        $interactive = isset($options['interactive']) ? $options['interactive'] : self::DEFAULT_INTERACTIVE;
+        $ignorePagination = isset($options['ignorePagination']) ? $options['ignorePagination'] : self::DEFAULT_IGNORE_PAGINATION;
+        $async = isset($options['async']) ? $options['async'] : self::DEFAULT_ASYNC;
         //Optional Options
-        $pages = $transformerKey = $attachmentsPrefix = null;
-        $parameters = array();
-        //Extract the options array
-        extract($options, EXTR_IF_EXISTS);
+        $pages = isset($options['pages']) ? $options['pages'] : null;
+        $transformerKey = isset($options['transformerKey']) ? $options['transformerKey'] : null;
+        $attachmentsPrefix = isset($options['attachmentsPrefix']) ? $options['attachmentsPrefix'] : null;
+        $parameters = isset($options['parameters']) ? $options['parameters'] : array();
 
         //Enforce Required Options
         if (is_null($resource)) {
@@ -255,6 +308,33 @@ class JasperHelper {
             $writer->endElement();
         }
         $writer->endElement();
+
+        $writer->endElement();
+
+        //Return the completed XML string
+        return $writer->outputMemory();
+    }
+
+
+    /**
+     * Generate the xml for an export execution request
+     *
+     * @param  string $format  the format to generate the export request for
+     * @param  array  $options additional options
+     *
+     * @return string          request as a string
+     */
+    public static function generateExportExecutionRequestXML($format, $options) {
+        //Create an instance of the XML Writer
+        $writer = new \XMLWriter();
+        $writer->openMemory();
+
+        $writer->startElement('export');
+
+        $writer->writeElement('outputFormat', $format);
+        foreach($options as $name => $value) {
+            $writer->writeElement($name, $value);
+        }
 
         $writer->endElement();
 

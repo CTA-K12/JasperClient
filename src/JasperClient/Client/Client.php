@@ -20,18 +20,38 @@ class Client {
     const FORMAT_HTML = 'html';
     const FORMAT_PDF = 'pdf';
     const FORMAT_XLS = 'xls';
+    const STATUS_READY = 'ready';
 
     private $host;
     private $user;
     private $pass;
     private $rest;
 
+    /**
+     * Array of objects implementing the postReportExecutionCallback Interface
+     * @var array
+     */
+    private $postExecutionCallbacks;
 
-    public function __construct($host = null, $user = null, $pass = null, $jSessionID = null) {
+    /**
+     * Array of objects implementing the postReportCacheCallback Interface
+     * @var array
+     */
+    private $postCacheCallbacks;
+
+    /**
+     * String representation of the jasper server version
+     * @var string
+     */
+    private $version;
+
+
+    public function __construct($host = null, $user = null, $pass = null, $jSessionID = null, $version = '5.5.0') {
 
         $this->host = $host;
         $this->user = $user;
         $this->pass = $pass;
+        $this->version = $version;
 
         try {
             $this->rest = new RestHandler($this->host, $ssl = false, $jSessionID);
@@ -238,7 +258,112 @@ class Client {
         $error = $resp['error'];
 
         //Return the output
-        return array('output' => $output, 'error' => $error);
+        return array('output' => $output, 'error' => $error, 'exportId' => $format);
+    }
+
+
+    /**
+     * Get the output of an executed for jasper versions >= 5.6
+     *
+     * @param  string $requestId The request id
+     * @param  string $exportId  The export id
+     *
+     * @return array             Array with key output pointing to the report output and key error pointing to boolean as to whether and error occured
+     */
+    public function getExecutedReportOutput($requestId, $exportId) {
+        //Make a request to the report executions service
+        try {
+            $resp = $this->rest->get(JasperHelper::url("/jasperserver/rest_v2/reportExecutions/{$requestId}/exports/{$exportId}/outputResource"));
+        } catch(\Exception $e) {
+            throw $e;
+        }
+
+        //Get the output from the response
+        $output = $resp['body'];
+        $error = $resp['error'];
+
+        //Return the output
+        return array('output' => $output, 'error' => $error, 'exportId' => $exportId);
+    }
+
+
+    /**
+     * Start the export of a executed report
+     *
+     * @param  string $requestId The request id of the executed report
+     * @param  string $format    The format to export in
+     * @param  array  $options   The array of options
+     *
+     * @return SimpleXMLElement  The Export Execution Details in XML format
+     */
+    public function startExportExecution($requestId, $format, $options = array()) {
+        //Generate the xml request
+        $exportExecutionRequest = JasperHelper::generateExportExecutionRequestXML($format, $options);
+
+        //Send the export request to the report server
+        try {
+            $resp = $this->rest->post(JasperHelper::url("/jasperserver/rest_v2/reportExecutions/{$requestId}/exports/"),
+                $exportExecutionRequest, 'application/xml', 'application/xml');
+        } catch (\Exception $e) {
+            throw $e;
+        }
+
+        //Return the output
+        return new \SimpleXMLElement($resp['body']);
+    }
+
+
+    /**
+     * Poll the status on a export execution
+     *
+     * @param  string            $requestId The request id of the report
+     * @param  string            $exportId  The export id of the export to check
+     *
+     * @return \SimpleXMLElement            The xml return from the report server
+     */
+    public function pollExportExecution($requestId, $exportId) {
+        //Make a request to the report executions service
+        try {
+            $resp = $this->rest->get(JasperHelper::url("/jasperserver/rest_v2/reportExecutions/{$requestId}/exports/{$exportId}/status"));
+        } catch(\Exception $e) {
+            throw $e;
+        }
+
+        //Return the output
+        return new \SimpleXMLElement($resp['body']);
+    }
+
+
+    /**
+     * Gets an export
+     *
+     * @param  string $requestId The request id of the report
+     * @param  string $format    The format to get
+     * @param  array  $options   The options
+     *
+     * @return array             The response
+     */
+    public function getExport($requestId, $format, $options = array()) {
+        //Ignore the attachmentsPrefix option if the format is not html
+        if (self::FORMAT_HTML !== $format && isset($options['attachmentsPrefix'])) {
+            unset($options['attachmentsPrefix']);
+        }
+
+        //Start the export
+        $details = $this->startExportExecution($requestId, $format, $options);
+
+        //Get the export id
+        $exportId = JasperHelper::getExportIdFromDetails($details);
+
+        //Check the status
+        if (self::STATUS_READY !== JasperHelper::getExportStatusFromDetails($details)) {
+            while(self::STATUS_READY !== JasperHelper::getExportStatusFromPoll($this->pollExportExecution($requestId, $exportId))) {
+                usleep(200);
+            }
+        }
+
+        //Get the output
+        return $this->getExecutedReportOutput($requestId, $exportId);
     }
 
 
@@ -297,7 +422,11 @@ class Client {
         //Get the outputs for the reports 
         $output = array();
         foreach($formats as $format) {
-            $output[$format] = $this->getExecutedReport($requestId, $format);
+            if (0 <= version_compare($this->version, '5.6.0')) {
+                $output[$format] = $this->getExport($requestId, $format, array('attachmentsPrefix' => $prefix));
+            } else {
+                $output[$format] = $this->getExecutedReport($requestId, $format);
+            }
         }
 
         try {
@@ -322,7 +451,7 @@ class Client {
                 if (self::FORMAT_HTML == $format) {
                     $html = $output[$format]['output'];
                     //Cache the attachments
-                    $attachments = $this->cacheReportAttachments($execDetail, 
+                    $attachments = $this->cacheReportAttachments($execDetail, $output[$format]['exportId'],
                         array('reportCacheDirectory' => $reportCacheDirectory,
                               'attachmentsPrefix' => $prefix));
 
@@ -379,11 +508,11 @@ class Client {
      * @return array                                    An array of the paths of the attachments in the cache keyed by their original name 
      *                                                    prepended with the attachmentsPrefix
      */
-    public function cacheReportAttachments(\SimpleXMLElement $reportExecutionDetails, $options = []) {
+
+    public function cacheReportAttachments(\SimpleXMLElement $reportExecutionDetails, $exportId, $options = array()) {
         //Handle the options
-        $reportCacheDirectory = 'report_cache/';
-        $attachmentsPrefix = '';
-        extract($options, EXTR_IF_EXISTS);
+        $reportCacheDirectory = isset($options['reportCacheDirectory']) ? $options['reportCacheDirectory'] : 'report_cache/';
+        $attachmentsPrefix = isset($options['attachmentsPrefix']) ? $options['attachmentsPrefix'] : '';
 
         //Get the request id
         $requestId = JasperHelper::getRequestIdFromDetails($reportExecutionDetails);
@@ -404,7 +533,7 @@ class Client {
 
             //If the values were obtained cache the attachment
             if (null !== $contentType && null !== $attachmentFile && null !== $requestId) {
-                $attachments[$attachmentsPrefix . $attachmentFile] = $this->cacheReportAttachment($requestId, $attachmentFile, $contentType, 
+                $attachments[$attachmentsPrefix . $attachmentFile] = $this->cacheReportAttachment($requestId, $exportId, $attachmentFile, $contentType, 
                     array('reportCacheDirectory' => $reportCacheDirectory));
             }
         }
@@ -417,20 +546,18 @@ class Client {
     /**
      * Retrieves and caches an attachment for an executed report
      * 
-     * @param  string $requestId            Request Id of the executed report
-     * @param  string $attachment           The name of the attachment
-     * @param  string $attachmentType       The type of file the attachment is as specified in the report execution detail (e.g. image/png)
-     * @param  array  $options              Options Array:
-     *                                        'reportCacheDirectory' => Directory of the report cache
-     *                                        'exportId' => Id of the export type (html)
+     * @param  string $requestId      Request Id of the executed report
+     * @param  string $exportId       The export id
+     * @param  string $attachment     The name of the attachment
+     * @param  string $attachmentType The type of file the attachment is as specified in the report execution detail (e.g. image/png)
+     * @param  array  $options        Options Array:
+     *                                  'reportCacheDirectory' => Directory of the report cache
      * 
-     * @return string                       The path to the cached image file
+     * @return string                 The path to the cached image file
      */
-    public function cacheReportAttachment($requestId, $attachment, $attachmentType, $options = []) {
+    public function cacheReportAttachment($requestId, $exportId, $attachment, $attachmentType, $options = array()) {
         //Handle the options array
-        $exportId = 'html';
-        $reportCacheDirectory = 'report_cache/';
-        extract($options, EXTR_IF_EXISTS);
+        $reportCacheDirectory = isset($options['reportCacheDirectory']) ? $options['reportCacheDirectory'] : 'report_cache/';
 
         //Get the attachment from the jasper report server
         try {
