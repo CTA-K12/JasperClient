@@ -79,6 +79,26 @@ class ReportLoader
 
 
     /**
+     * Checks if a report is saved in the report store
+     *
+     * @param  string  $requestId The request id of the report to check
+     *
+     * @return boolean            Whether the report is in the store or not
+     */
+    public function checkIfReportIsStored($requestId) {
+        //Check if the report exists within the cache
+        $cacheDir = JasperHelper::generateReportCacheFolderPath($requestId, $this->reportCache);
+
+        //Check that the report was cached
+        if (file_exists($cacheDir)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
      * Gets the output of a report from the cache
      * 
      * @param  string $requestId Request Id of the report to retrieve
@@ -90,7 +110,7 @@ class ReportLoader
      * 
      * @return JasperClient\Client\Report The loaded report object from the cache
      */
-    public function getCachedReport($requestId, $format, $options = []) {
+    public function getCachedReport($requestId, $format, $options = array()) {
         //Handle the options
         $page = (isset($options['page']) && null !== $options['page']) ? $options['page'] : $this->defaultPage;
         $attachAssetUrl = (isset($options['attachAssetUrl']) && null !== $options['attachAssetUrl']) 
@@ -118,6 +138,15 @@ class ReportLoader
             throw $e;
         }
 
+        //Create a new report object to store the information in
+        $report = new Report($format, $page);
+        $report->loadReportExecutionDetails($red);
+
+        //Check that the report is in the request format
+        if (!in_array($format, $report->getAvailableFormats())) {
+            throw new \Exception(self::MESSAGE_REPORT_NOT_IN_FORMAT);
+        }
+
         //Check that the requested format is available
         if (self::FORMAT_HTML === $format) {
             $cacheFile = $cacheDir . '/html_page_' . $page . '.html';
@@ -133,21 +162,18 @@ class ReportLoader
                 throw $e;
             }
 
-            //Create a new report object to store the information in
-            $report = new Report($format, $page);
-            $report->loadReportExecutionDetails($red);
             $report->setOutput($output);
 
             //If set, call the attach asset url function of the report object
             if ($attachAssetUrl && self::FORMAT_HTML === $format) {
                 $report->addAssetUrl($assetUrl);
             }
-
-            //Return the report
-            return $report;
         } else {
-            throw new \Exception(self::MESSAGE_REPORT_NOT_IN_FORMAT);
+            $report->setOutput('The report is empty');
         }
+
+        //Return the report
+        return $report;
     }
 
 

@@ -258,7 +258,7 @@ class JasperHelper {
      * 
      * @return string           Request as an xml string
      */
-    public static function generateReportExecutionRequestXML($resource, $options = []) {
+    public static function generateReportExecutionRequestXML($resource, $options = array()) {
         //Set the defaults and get the information from the options array
         //Options with defaults
         $outputFormat = isset($options['outputFormat']) ? $options['outputFormat'] : self::DEFAULT_OUTPUT_FORMAT;
@@ -299,13 +299,15 @@ class JasperHelper {
         if ($attachmentsPrefix) { $writer->writeElement('attachmentsPrefix', $attachmentsPrefix); }
         $writer->startElement('parameters');
         $writer->text('');  //By having this when no parameters are present the tags show properly
-        foreach($parameters as $name => $values) {
-            $writer->startElement('reportParameter');
-            $writer->writeAttribute('name', $name);
-            foreach($values as $value) {
-                $writer->writeElement('value', $value);
+        if (null !== $parameters) {
+            foreach($parameters as $name => $values) {
+                $writer->startElement('reportParameter');
+                $writer->writeAttribute('name', $name);
+                foreach($values as $value) {
+                    $writer->writeElement('value', $value);
+                }
+                $writer->endElement();
             }
-            $writer->endElement();
         }
         $writer->endElement();
 
@@ -351,7 +353,7 @@ class JasperHelper {
      * 
      * @return string         resulting string
      */
-    public static function generateParameterString($params, $ignore = []) {
+    public static function generateParameterString($params, $ignore = array()) {
         //If the parameters is an array turn them into a string
         if (is_array($params) && sizeof($params) > 0) {
             $paramStr = '?';
@@ -396,7 +398,7 @@ class JasperHelper {
      * 
      * @return string                  The modified output
      */
-    public static function replaceAttachmentLinks($output, $options = []) {
+    public static function replaceAttachmentLinks($output, $options = array()) {
         //Handle the options array
         $assetUrl = (isset($options['assetUrl']) && null != $options['assetUrl']) ? $options['assetUrl'] : null;
         $replacements = (isset($options['replacements']) && null != $options['replacements']) ? $options['replacements'] : null;
@@ -431,9 +433,9 @@ class JasperHelper {
                 preg_match_all('/<.+?src=[\"\'](.+?)[\"\'].*?>/', $output, $matches);
 
                 //Get the matching assets
-                $assets = isset($matches[1]) ? $matches[1] : array();
+                $srcAssets = isset($matches[1]) ? $matches[1] : array();
                 $replacementAssets = array();
-                foreach($assets as $asset) {
+                foreach($srcAssets as $asset) {
                     //Ignore jquery for now
                     if (false === strpos($asset, 'jquery/js/jquery-') && $removeJQuery) {
                         //Break the url into parts

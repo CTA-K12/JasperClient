@@ -8,6 +8,7 @@ namespace JasperClient\Client;
 
 use JasperClient\Client\Report;
 use JasperClient\Client\ReportLoader;
+use JasperClient\Interfaces\InputControlAbstractFactory;
 
 /**
  * Report Builder
@@ -186,7 +187,7 @@ class ReportBuilder {
      * 
      * @param array $params Parameters array keyed by the input parameter's label
      */
-    public function setInputParametersArray($params = []) {
+    public function setInputParametersArray($params = array()) {
         //Foreach value in the given array, set it
         foreach($params as $label => $values) {
             $this->setInputParameter($label, $values);
@@ -220,7 +221,7 @@ class ReportBuilder {
      * 
      * @return string           The request id of the report execution request
      */
-    public function sendExecutionRequest($options = []) {
+    public function sendExecutionRequest($options = array()) {
         //Add the input parameters to the options array
         $options['parameters'] = $this->params;
 
@@ -237,9 +238,9 @@ class ReportBuilder {
      *
      * @param  array  $options Options array
      *
-     * @return Report          Generated Report Object
+     * @return string          The request id of the cached report
      */
-    public function runReport($options = []) {
+    public function runReport($options = array()) {
         //This does not work with async yet
         $options['async'] = false;
 
@@ -249,12 +250,8 @@ class ReportBuilder {
         //Tell the client to cache
         $this->client->cacheReportExecution($requestId, array('reportCacheDirectory' => $this->reportCache));
 
-        //Load it
-        $rl = new ReportLoader($this->reportCache);
-        $report = $rl->getCachedReport($requestId, $this->format);
-
-        //Return the report
-        return $report;
+        //Return the request id
+        return $requestId;
     }
 
 

@@ -10,6 +10,8 @@ namespace JasperClient\Client;
 use JasperClient\Client\ReportBuilder;
 use JasperClient\Client\ReportExecutionWatcher;
 use JasperClient\Interfaces\InputControlAbstractFactory;
+use JasperClient\Interfaces\PostReportExecutionCallback;
+use JasperClient\Interfaces\PostReportCacheCallback;
 
 class Client {
 
@@ -22,9 +24,32 @@ class Client {
     const FORMAT_XLS = 'xls';
     const STATUS_READY = 'ready';
 
+    ///////////////
+    // VARIABLES //
+    ///////////////
+
+    /**
+     * The host name of the server running jasper server
+     * @var string
+     */
     private $host;
+
+    /**
+     * The username to use when connecting to the jasper server
+     * @var string
+     */
     private $user;
+
+    /**
+     * The password for the user
+     * @var string
+     */
     private $pass;
+
+    /**
+     * Reference to the rest handler
+     * @var RestHandler
+     */
     private $rest;
 
     /**
@@ -45,7 +70,6 @@ class Client {
      */
     private $version;
 
-
     public function __construct($host = null, $user = null, $pass = null, $jSessionID = null, $version = '5.5.0') {
 
         $this->host = $host;
@@ -64,6 +88,10 @@ class Client {
         catch (\Exception $e) {
             throw $e;
         }
+
+        //Initialize the callback arrays
+        $this->postExecutionCallbacks = array();
+        $this->postCacheCallbacks = array();
     }
 
 
@@ -202,7 +230,7 @@ class Client {
      * 
      * @return SimpleXMLElement The Report Execution Details in XML format
      */
-    public function startReportExecution($resource, $options = []) {
+    public function startReportExecution($resource, $options = array()) {
         //Create the XML string with the report options
         $reportExecutionRequest = JasperHelper::generateReportExecutionRequestXML($resource, $options);
 
@@ -212,6 +240,12 @@ class Client {
                 $reportExecutionRequest, 'application/xml', 'application/xml');
         } catch (\Exception $e) {
             throw $e;
+        }
+
+        if ($this->postExecutionCallbacks) {
+            foreach($this->postExecutionCallbacks as $callback) {
+                $callback->postReportExecution($resource, $options, new \SimpleXMLElement($resp['body']));
+            }
         }
 
         //Return the output
@@ -397,7 +431,7 @@ class Client {
      *                                         'attachmentsPrefix' => prefix given to attachments in the report execution request (for image caching)
      * @return boolean                       Boolean indicator of this methods success
      */
-    public function cacheReportExecution($requestId, $options = []) {
+    public function cacheReportExecution($requestId, $options = array()) {
         //Set the success flag
         $success = true;
 
@@ -492,6 +526,14 @@ class Client {
             throw $e;
         }
 
+        if ($this->postCacheCallbacks) {
+            //Temporary fix until the options array is handled via array merge
+            $options['formats'] = $formats;
+            foreach($this->postCacheCallbacks as $callback) {
+                $callback->postReportCache($requestId, $options, $execDetail);
+            }
+        }
+
         //Return success
         return $success;
     }
@@ -508,7 +550,6 @@ class Client {
      * @return array                                    An array of the paths of the attachments in the cache keyed by their original name 
      *                                                    prepended with the attachmentsPrefix
      */
-
     public function cacheReportAttachments(\SimpleXMLElement $reportExecutionDetails, $exportId, $options = array()) {
         //Handle the options
         $reportCacheDirectory = isset($options['reportCacheDirectory']) ? $options['reportCacheDirectory'] : 'report_cache/';
@@ -598,11 +639,11 @@ class Client {
      * 
      * @param  string $reportUri Uri of the report on the Jasper Server
      * @param  string $getICFrom Where to get the options for input controls from
-     * @param  JasperClient\Interfaces\InputControlAbstractFactory $inputControlFactory Implementation of the input factory to handle inputs
+     * @param  InputControlAbstractFactory $inputControlFactory Implementation of the input factory to handle inputs
      * 
-     * @return JasperClient\Client\ReportBuilder The new report builder object
+     * @return ReportBuilder The new report builder object
      */
-    public function createReportBuilder($reportUri, $getICFrom = 'Jasper', JasperClient\Interfaces\InputControlAbstractFactory $inputControlFactory = null) {
+    public function createReportBuilder($reportUri, $getICFrom = 'Jasper', InputControlAbstractFactory $inputControlFactory = null) {
         return new ReportBuilder($this, $reportUri, $getICFrom, $inputControlFactory);
     }
 
@@ -665,6 +706,21 @@ class Client {
         }
 
         return $resp['body'];
+    }
+
+
+    /**
+     * Add a callback class to the list of post report execution callbacks
+     *
+     * @param PostReportExecutionCallback $callback The callback to add to the list
+     */
+    public function addPostReportExecutionCallback(PostReportExecutionCallback $callback) {
+        $this->postExecutionCallbacks[] = $callback;
+    }
+
+
+    public function addPostReportCacheCallback(PostReportCacheCallback $callback) {
+        $this->postCacheCallbacks[] = $callback;
     }
 
 }
